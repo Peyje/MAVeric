@@ -26,5 +26,6 @@ waypoint_actuator.add_service('socket')
  
 # set up environment
 env = Environment('indoors-1/boxes')
+env.configure_stream_manager('socket', time_sync = True, sync_port = 12000) # time sync to GUI
 env.set_camera_location([5, -5, 6])
 env.set_camera_rotation([1.0470, 0, 0.7854])

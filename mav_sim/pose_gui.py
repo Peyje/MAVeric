@@ -1,69 +1,74 @@
-import sys
 import telnetlib
 import gi
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GLib
 
-# main window of GUI
-class LabelWindow(Gtk.Window):
+# data fields for state
+state_x = 0.0
+state_y = 0.0
+state_z = 0.0
+
+
+# this class saves the current state of the MAV
+class State:
 	def __init__(self):
-		Gtk.Window.__init__(self, title="Label Example")
-
-# frame wherein pose values are written
-class Frame(Gtk.Frame):
-	def __init__(self):
-		Gtk.Frame.__init__(self)
-		self.set_label("Pose")
-
-		grid = Gtk.Grid()
-		self.add(grid)
-
-		# add label for x value
-		self.x_label = Gtk.Label("X")
-		grid.add(self.x_label)
-		#self.add(self.x_label)
-		self.y_label = Gtk.Label("Y")
-		grid.attach(self.y_label, 1, 0, 1, 1)
-		#self.add(self.y_label)
-		self.z_label = Gtk.Label("Z")
-		grid.attach(self.z_label, 2, 0, 1, 1)
-		#self.add(self.z_label)
+		# retrieve labels
+		self.state_x_label = builder.get_object("state_x")
+		self.state_y_label = builder.get_object("state_y")
+		self.state_z_label = builder.get_object("state_z")
 
 		# refresh those values every second
-		GLib.timeout_add_seconds(1, self.updatePose)
-		self.updatePose()
+		GLib.timeout_add(100, self.updateState)
+		self.updateState()
 
-	# update pose values from telnet connection
-	def updatePose(self):
+	# update state values from telnet connection
+	def updateState(self):
+		#comm.read_some()
+		comm.write(b'id1 mav.pose_sensor get_local_data \n')
 		# update x value
-		tn.read_until('"x": ')
-		pose_x = tn.read_until(',') # returns read values + finishing ,
-		pose_x = pose_x[:-1] # cut that ,
-		self.x_label.set_text("X: " + pose_x)
+		comm.read_until(b'"x": ')  # b'' as Telnet needs a bytes object instead of string since Python3
+		read = comm.read_until(b',')  # returns read values + finishing ,
+		read = read[:-1]  # cut that ,
+		global state_x
+		state_x = float(read)
+		self.state_x_label.set_text("%0.2f" % state_x)
 		# update y value
-		tn.read_until('"y": ')
-		pose_y = tn.read_until(',')
-		pose_y = pose_y[:-1]
-		self.y_label.set_text("Y: " + pose_y)
-		#update z value
-		tn.read_until('"z": ')
-		pose_z = tn.read_until(',')
-		pose_z = pose_z[:-1]
-		self.z_label.set_text("Z: " + pose_z)
+		comm.read_until(b'"y": ')
+		read = comm.read_until(b',')
+		read = read[:-1]
+		global state_y
+		state_y = float(read)
+		self.state_y_label.set_text("%0.2f" % state_y)
+		# update z value
+		comm.read_until(b'"z": ')
+		read = comm.read_until(b',')
+		read = read[:-1]
+		global state_z
+		state_z = float(read)
+		self.state_z_label.set_text("%0.2f" % state_z)
+		comm.write(b'id1 mav.waypoint_actuator setdest [2,2,2,2,0.2] \n')
 		return GLib.SOURCE_CONTINUE
 
+
+# MAIN
 if __name__ == "__main__":
 	# open telnet connection to port where pose sensor streams to
-	tn = telnetlib.Telnet("localhost", 60001)
+	comm = telnetlib.Telnet("localhost", 4000)
+
+	# load layout from glade file
+	builder = Gtk.Builder()
+	builder.add_from_file("layout.glade")
 
 	# main GUI code
-	window = LabelWindow()        
+	window = builder.get_object("main")
 	window.connect("destroy", Gtk.main_quit)
-	window.set_border_width(30)
-	window.add(Frame())
 	window.show_all()
+
+	# create state object
+	current_state = State()
+
+	# run GUI
 	Gtk.main()
-
-
-
+# everything beyond this line will only be run after exiting!
