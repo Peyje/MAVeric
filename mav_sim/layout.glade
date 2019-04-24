@@ -172,8 +172,8 @@
           <object class="GtkFrame" id="current_state_frame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label_xalign">0.56999999284744263</property>
-            <property name="shadow_type">none</property>
+            <property name="label_xalign">0.5</property>
+            <property name="shadow_type">in</property>
             <child>
               <object class="GtkAlignment">
                 <property name="visible">True</property>
@@ -183,12 +183,16 @@
                   <object class="GtkGrid" id="state_grid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="column_spacing">5</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Y</property>
                         <property name="justify">center</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -201,6 +205,9 @@
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Z</property>
                         <property name="justify">center</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -214,6 +221,9 @@
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
                         <property name="label" translatable="yes">state_x</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -227,6 +237,9 @@
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
                         <property name="label" translatable="yes">state_y</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -240,6 +253,9 @@
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
                         <property name="label" translatable="yes">state_z</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -252,6 +268,9 @@
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">X</property>
                         <property name="justify">center</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -263,6 +282,9 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Φ</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -274,6 +296,9 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">θ</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -285,6 +310,9 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ψ</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -298,6 +326,9 @@
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
                         <property name="label" translatable="yes">state_phi</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -311,6 +342,9 @@
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
                         <property name="label" translatable="yes">state_theta</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -318,12 +352,15 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="state_ph">
+                      <object class="GtkLabel" id="state_psi">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
-                        <property name="label" translatable="yes">state_phi</property>
+                        <property name="label" translatable="yes">state_psi</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -335,6 +372,9 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">x_dot</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -346,6 +386,9 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">y_dot</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -357,43 +400,13 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">z_dot</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
                         <property name="top_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">p</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">q</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">r</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">6</property>
                       </packing>
                     </child>
                     <child>
@@ -403,6 +416,9 @@
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
                         <property name="label" translatable="yes">state_x_dot</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -416,6 +432,9 @@
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
                         <property name="label" translatable="yes">state_y_dot</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -429,6 +448,9 @@
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
                         <property name="label" translatable="yes">state_z_dot</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -436,15 +458,60 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="state_p">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">p</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">q</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">r</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="state_r">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
-                        <property name="label" translatable="yes">state_p</property>
+                        <property name="label" translatable="yes">state_r</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
+                        <property name="left_attach">2</property>
                         <property name="top_attach">7</property>
                       </packing>
                     </child>
@@ -455,6 +522,9 @@
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
                         <property name="label" translatable="yes">state_q</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -462,15 +532,18 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="state_r">
+                      <object class="GtkLabel" id="state_p">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">1</property>
                         <property name="margin_right">1</property>
-                        <property name="label" translatable="yes">state_r</property>
+                        <property name="label" translatable="yes">state_p</property>
+                        <attributes>
+                          <attribute name="background" value="#000000000000"/>
+                        </attributes>
                       </object>
                       <packing>
-                        <property name="left_attach">2</property>
+                        <property name="left_attach">0</property>
                         <property name="top_attach">7</property>
                       </packing>
                     </child>
@@ -485,7 +558,7 @@
                 <property name="label" translatable="yes">Current State</property>
                 <property name="justify">center</property>
                 <attributes>
-                  <attribute name="underline" value="True"/>
+                  <attribute name="size" value="20000"/>
                 </attributes>
               </object>
             </child>
@@ -499,8 +572,8 @@
           <object class="GtkFrame" id="goto_frame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label_xalign">0</property>
-            <property name="shadow_type">none</property>
+            <property name="label_xalign">0.5</property>
+            <property name="shadow_type">in</property>
             <child>
               <object class="GtkAlignment">
                 <property name="visible">True</property>
@@ -510,11 +583,15 @@
                   <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="halign">center</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">X</property>
+                        <property name="label" translatable="yes">X   </property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -525,40 +602,10 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Y</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Z</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">ψ</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="goto_x">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="input_purpose">digits</property>
+                        <property name="label" translatable="yes">Y   </property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -566,13 +613,91 @@
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Z   </property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">ψ    </property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">3</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkButton" id="goto_button">
+                        <property name="label" translatable="yes">Go!</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="halign">center</property>
+                        <signal name="clicked" handler="onGoToButtonPress" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">4</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="goto_x">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="placeholder_text" translatable="yes">0.00 in Metern</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="goto_y">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="placeholder_text" translatable="yes">0.00 in Metern</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="goto_z">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="placeholder_text" translatable="yes">0.00 in Metern</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="goto_phi">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="placeholder_text" translatable="yes">0.00 in Radian</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">3</property>
+                      </packing>
                     </child>
                   </object>
                 </child>
@@ -582,17 +707,35 @@
               <object class="GtkLabel" id="goto_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">6</property>
                 <property name="label" translatable="yes">GoTo</property>
+                <property name="justify">center</property>
                 <attributes>
-                  <attribute name="underline" value="True"/>
+                  <attribute name="size" value="20000"/>
                 </attributes>
               </object>
             </child>
           </object>
           <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">1</property>
+            <property name="left_attach">0</property>
+            <property name="top_attach">3</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="sep">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>

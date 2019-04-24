@@ -9,6 +9,9 @@ from gi.repository import GLib
 state_x = 0.0
 state_y = 0.0
 state_z = 0.0
+state_phi = 0.0
+state_theta = 0.0
+state_psi = 0.0
 
 
 # this class saves the current state of the MAV
@@ -18,6 +21,9 @@ class State:
 		self.state_x_label = builder.get_object("state_x")
 		self.state_y_label = builder.get_object("state_y")
 		self.state_z_label = builder.get_object("state_z")
+		self.state_phi_label = builder.get_object("state_phi")
+		self.state_theta_label = builder.get_object("state_theta")
+		self.state_psi_label = builder.get_object("state_psi")
 
 		# refresh those values every second
 		GLib.timeout_add(100, self.updateState)
@@ -48,9 +54,45 @@ class State:
 		global state_z
 		state_z = float(read)
 		self.state_z_label.set_text("%0.2f" % state_z)
-		comm.write(b'id1 mav.waypoint_actuator setdest [2,2,2,2,0.2] \n')
+		# update yaw value
+		comm.read_until(b'"yaw": ')
+		read = comm.read_until(b',')
+		read = read[:-1]
+		global state_psi
+		state_psi = float(read)
+		self.state_psi_label.set_text("%0.2f" % state_psi)
+		# update pitch value
+		comm.read_until(b'"pitch": ')
+		read = comm.read_until(b',')
+		read = read[:-1]
+		global state_theta
+		state_theta = float(read)
+		self.state_theta_label.set_text("%0.2f" % state_theta)
+		# update roll value
+		comm.read_until(b'"roll": ')
+		read = comm.read_until(b'}')
+		read = read[:-1]
+		global state_phi
+		state_phi = float(read)
+		self.state_phi_label.set_text("%0.2f" % state_phi)
 		return GLib.SOURCE_CONTINUE
 
+
+# handler class for GUI
+class Handler:
+	def __init__(self):
+		self.goto_x_entry = builder.get_object("goto_x")
+		self.goto_y_entry = builder.get_object("goto_y")
+		self.goto_z_entry = builder.get_object("goto_z")
+		self.goto_phi_entry = builder.get_object("goto_phi")
+
+	def onGoToButtonPress(self, button):
+		self.goto_x = self.goto_x_entry.get_text()
+		self.goto_y = self.goto_y_entry.get_text()
+		self.goto_z = self.goto_z_entry.get_text()
+		self.goto_phi = self.goto_phi_entry.get_text()
+		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (self.goto_x, self.goto_y, self.goto_z, self.goto_phi)
+		comm.write(bytes(command_string, 'utf8'))
 
 # MAIN
 if __name__ == "__main__":
@@ -60,6 +102,7 @@ if __name__ == "__main__":
 	# load layout from glade file
 	builder = Gtk.Builder()
 	builder.add_from_file("layout.glade")
+	builder.connect_signals(Handler())
 
 	# main GUI code
 	window = builder.get_object("main")
