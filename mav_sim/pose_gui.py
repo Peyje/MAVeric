@@ -12,7 +12,12 @@ state_z = 0.0
 state_phi = 0.0
 state_theta = 0.0
 state_psi = 0.0
-
+state_x_dot = 0.0
+state_y_dot = 0.0
+state_z_dot = 0.0
+state_p = 0.0
+state_q = 0.0
+state_r = 0.0
 
 # this class saves the current state of the MAV
 class State:
@@ -24,6 +29,12 @@ class State:
 		self.state_phi_label = builder.get_object("state_phi")
 		self.state_theta_label = builder.get_object("state_theta")
 		self.state_psi_label = builder.get_object("state_psi")
+		self.state_x_dot_label = builder.get_object("state_x_dot")
+		self.state_y_dot_label = builder.get_object("state_y_dot")
+		self.state_z_dot_label = builder.get_object("state_z_dot")
+		self.state_p_label = builder.get_object("state_p")
+		self.state_q_label = builder.get_object("state_q")
+		self.state_r_label = builder.get_object("state_r")
 
 		# refresh those values every second
 		GLib.timeout_add(100, self.updateState)
@@ -31,12 +42,12 @@ class State:
 
 	# update state values from telnet connection
 	def updateState(self):
-		#comm.read_some()
+		# ask for current pose data
 		comm.write(b'id1 mav.pose_sensor get_local_data \n')
 		# update x value
 		comm.read_until(b'"x": ')  # b'' as Telnet needs a bytes object instead of string since Python3
-		read = comm.read_until(b',')  # returns read values + finishing ,
-		read = read[:-1]  # cut that ,
+		read = comm.read_until(b',')  # returns read values + finishing ','
+		read = read[:-1]  # cut that ','
 		global state_x
 		state_x = float(read)
 		self.state_x_label.set_text("%0.2f" % state_x)
@@ -75,28 +86,73 @@ class State:
 		global state_phi
 		state_phi = float(read)
 		self.state_phi_label.set_text("%0.2f" % state_phi)
+
+		#ask for current velocity data
+		comm.write(b'id1 mav.velocity_sensor get_local_data \n')
+		#update p value
+		comm.read_until(b'"angular_velocity": [')
+		read = comm.read_until(b',')
+		read = read[:-1]
+		global state_p
+		state_p = float(read)
+		self.state_p_label.set_text("%0.2f" % state_p)
+		# update q value
+		read = comm.read_until(b',')
+		read = read[:-1]
+		global state_q
+		state_q = float(read)
+		self.state_q_label.set_text("%0.2f" % state_q)
+		# update r value
+		read = comm.read_until(b']')
+		read = read[:-1]
+		global state_r
+		state_r = float(read)
+		self.state_r_label.set_text("%0.2f" % state_r)
+
+		# update x_dot value
+		comm.read_until(b'"world_linear_velocity": [')
+		read = comm.read_until(b',')
+		read = read[:-1]
+		global state_x_dot
+		state_x_dot = float(read)
+		self.state_x_dot_label.set_text("%0.2f" % state_x_dot)
+		# update y_dot value
+		read = comm.read_until(b',')
+		read = read[:-1]
+		global state_y_dot
+		state_y_dot = float(read)
+		self.state_y_dot_label.set_text("%0.2f" % state_y_dot)
+		# update z_dot value
+		read = comm.read_until(b']')
+		read = read[:-1]
+		global state_z_dot
+		state_z_dot = float(read)
+		self.state_z_dot_label.set_text("%0.2f" % state_z_dot)
+
 		return GLib.SOURCE_CONTINUE
 
 
 # handler class for GUI
 class Handler:
 	def __init__(self):
+		# get GUI objects
 		self.goto_x_entry = builder.get_object("goto_x")
 		self.goto_y_entry = builder.get_object("goto_y")
 		self.goto_z_entry = builder.get_object("goto_z")
 		self.goto_phi_entry = builder.get_object("goto_phi")
 
 	def onGoToButtonPress(self, button):
-		self.goto_x = self.goto_x_entry.get_text()
-		self.goto_y = self.goto_y_entry.get_text()
-		self.goto_z = self.goto_z_entry.get_text()
-		self.goto_phi = self.goto_phi_entry.get_text()
-		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (self.goto_x, self.goto_y, self.goto_z, self.goto_phi)
+		goto_x = self.goto_x_entry.get_text()
+		goto_y = self.goto_y_entry.get_text()
+		goto_z = self.goto_z_entry.get_text()
+		goto_phi = self.goto_phi_entry.get_text()
+		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_phi)
 		comm.write(bytes(command_string, 'utf8'))
+
 
 # MAIN
 if __name__ == "__main__":
-	# open telnet connection to port where pose sensor streams to
+	# open telnet connection to port where interaction with sensors and actuators is possible
 	comm = telnetlib.Telnet("localhost", 4000)
 
 	# load layout from glade file
@@ -114,4 +170,4 @@ if __name__ == "__main__":
 
 	# run GUI
 	Gtk.main()
-# everything beyond this line will only be run after exiting!
+	# everything beyond this line will only be run after exiting!
