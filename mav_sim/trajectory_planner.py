@@ -1,6 +1,7 @@
 from numpy import *
 from scipy.sparse import csc_matrix
 from qpsolvers import solve_qp
+import draw
 
 class Waypoint:
     def __init__(self, x, y ,z, phi, time):
@@ -102,4 +103,6 @@ def planner(state, traj_x, traj_y, traj_z, traj_phi):
     b[7, 0] = waypoint1.phi
     b = hstack(b)  # convert to hstack for performance
 
-    print("QP solution:", solve_qp(P, q, G, h, A, b, solver="osqp"))  # solver = "quadprog" (default), "cvxpy", "osqp"
+    trajectory = solve_qp(P, q, G, h, A, b, solver="osqp") # solver = "quadprog" (default), "cvxpy", "osqp"
+    print("QP solution:", trajectory )
+    draw.draw_traj(waypoint0, waypoint1, trajectory)
