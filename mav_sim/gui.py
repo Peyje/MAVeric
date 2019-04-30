@@ -1,28 +1,31 @@
 import telnetlib
 import gi
+import trajectory_planner
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GLib
 
-# data fields for state
-state_x = 0.0
-state_y = 0.0
-state_z = 0.0
-state_phi = 0.0
-state_theta = 0.0
-state_psi = 0.0
-state_x_dot = 0.0
-state_y_dot = 0.0
-state_z_dot = 0.0
-state_p = 0.0
-state_q = 0.0
-state_r = 0.0
-
-# this class saves the current state of the MAV
+# class to save current state of MAV
 class State:
 	def __init__(self):
-		# retrieve labels
+		self.x = 0.0
+		self.y = 0.0
+		self.z = 0.0
+		self.phi = 0.0
+		self.theta = 0.0
+		self.psi = 0.0
+		self.x_dot = 0.0
+		self.y_dot = 0.0
+		self.z_dot = 0.0
+		self.p = 0.0
+		self.q = 0.0
+		self.r = 0.0
+
+# this class saves the current state of the MAV
+class Bridge:
+	def __init__(self):
+		# retrieve labels for state
 		self.state_x_label = builder.get_object("state_x")
 		self.state_y_label = builder.get_object("state_y")
 		self.state_z_label = builder.get_object("state_z")
@@ -37,7 +40,7 @@ class State:
 		self.state_r_label = builder.get_object("state_r")
 
 		# refresh those values every second
-		GLib.timeout_add(100, self.updateState)
+		#GLib.timeout_add(100, self.updateState)
 		self.updateState()
 
 	# update state values from telnet connection
@@ -48,44 +51,38 @@ class State:
 		comm.read_until(b'"x": ')  # b'' as Telnet needs a bytes object instead of string since Python3
 		read = comm.read_until(b',')  # returns read values + finishing ','
 		read = read[:-1]  # cut that ','
-		global state_x
-		state_x = float(read)
-		self.state_x_label.set_text("%0.2f" % state_x)
+		current_state.x = float(read)
+		self.state_x_label.set_text("%0.2f" % current_state.x)
 		# update y value
 		comm.read_until(b'"y": ')
 		read = comm.read_until(b',')
 		read = read[:-1]
-		global state_y
-		state_y = float(read)
-		self.state_y_label.set_text("%0.2f" % state_y)
+		current_state.y = float(read)
+		self.state_y_label.set_text("%0.2f" % current_state.y)
 		# update z value
 		comm.read_until(b'"z": ')
 		read = comm.read_until(b',')
 		read = read[:-1]
-		global state_z
-		state_z = float(read)
-		self.state_z_label.set_text("%0.2f" % state_z)
+		current_state.z = float(read)
+		self.state_z_label.set_text("%0.2f" % current_state.z)
 		# update yaw value
 		comm.read_until(b'"yaw": ')
 		read = comm.read_until(b',')
 		read = read[:-1]
-		global state_psi
-		state_psi = float(read)
-		self.state_psi_label.set_text("%0.2f" % state_psi)
+		current_state.psi = float(read)
+		self.state_psi_label.set_text("%0.2f" % current_state.psi)
 		# update pitch value
 		comm.read_until(b'"pitch": ')
 		read = comm.read_until(b',')
 		read = read[:-1]
-		global state_theta
-		state_theta = float(read)
-		self.state_theta_label.set_text("%0.2f" % state_theta)
+		current_state.theta = float(read)
+		self.state_theta_label.set_text("%0.2f" % current_state.theta)
 		# update roll value
 		comm.read_until(b'"roll": ')
 		read = comm.read_until(b'}')
 		read = read[:-1]
-		global state_phi
-		state_phi = float(read)
-		self.state_phi_label.set_text("%0.2f" % state_phi)
+		current_state.phi = float(read)
+		self.state_phi_label.set_text("%0.2f" % current_state.phi)
 
 		#ask for current velocity data
 		comm.write(b'id1 mav.velocity_sensor get_local_data \n')
@@ -135,11 +132,17 @@ class State:
 # handler class for GUI
 class Handler:
 	def __init__(self):
-		# get GUI objects
+		# get GUI objects for GoTo
 		self.goto_x_entry = builder.get_object("goto_x")
 		self.goto_y_entry = builder.get_object("goto_y")
 		self.goto_z_entry = builder.get_object("goto_z")
 		self.goto_phi_entry = builder.get_object("goto_phi")
+
+		# get GUI objects for Trajectory
+		self.traj_to_x_entry = builder.get_object("traj_to_x")
+		self.traj_to_y_entry = builder.get_object("traj_to_y")
+		self.traj_to_z_entry = builder.get_object("traj_to_z")
+		self.traj_to_phi_entry = builder.get_object("traj_to_phi")
 
 	def onGoToButtonPress(self, button):
 		goto_x = self.goto_x_entry.get_text()
@@ -148,6 +151,13 @@ class Handler:
 		goto_phi = self.goto_phi_entry.get_text()
 		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_phi)
 		comm.write(bytes(command_string, 'utf8'))
+
+	def onTrajGoButtonPress(self, button):
+		traj_x = float(self.traj_to_x_entry.get_text())
+		traj_y = float(self.traj_to_y_entry.get_text())
+		traj_z = float(self.traj_to_z_entry.get_text())
+		traj_phi = float(self.traj_to_phi_entry.get_text())
+		trajectory_planner.planner(current_state, traj_x, traj_y, traj_z, traj_phi)
 
 
 # MAIN
@@ -167,6 +177,9 @@ if __name__ == "__main__":
 
 	# create state object
 	current_state = State()
+
+	# create object to combine GUI, MORSE and state object
+	bridge = Bridge()
 
 	# run GUI
 	Gtk.main()
