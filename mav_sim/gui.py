@@ -40,7 +40,7 @@ class Bridge:
 		self.state_r_label = builder.get_object("state_r")
 
 		# refresh those values every second
-		#GLib.timeout_add(100, self.updateState)
+		GLib.timeout_add(100, self.updateState)
 		self.updateState()
 
 	# update state values from telnet connection
@@ -90,41 +90,35 @@ class Bridge:
 		comm.read_until(b'"angular_velocity": [')
 		read = comm.read_until(b',')
 		read = read[:-1]
-		global state_p
-		state_p = float(read)
-		self.state_p_label.set_text("%0.2f" % state_p)
+		current_state.p = float(read)
+		self.state_p_label.set_text("%0.2f" % current_state.p)
 		# update q value
 		read = comm.read_until(b',')
 		read = read[:-1]
-		global state_q
-		state_q = float(read)
-		self.state_q_label.set_text("%0.2f" % state_q)
+		current_state.q = float(read)
+		self.state_q_label.set_text("%0.2f" % current_state.q)
 		# update r value
 		read = comm.read_until(b']')
 		read = read[:-1]
-		global state_r
-		state_r = float(read)
-		self.state_r_label.set_text("%0.2f" % state_r)
+		current_state.r = float(read)
+		self.state_r_label.set_text("%0.2f" % current_state.r)
 
 		# update x_dot value
 		comm.read_until(b'"world_linear_velocity": [')
 		read = comm.read_until(b',')
 		read = read[:-1]
-		global state_x_dot
-		state_x_dot = float(read)
-		self.state_x_dot_label.set_text("%0.2f" % state_x_dot)
+		current_state.x_dot = float(read)
+		self.state_x_dot_label.set_text("%0.2f" % current_state.x_dot)
 		# update y_dot value
 		read = comm.read_until(b',')
 		read = read[:-1]
-		global state_y_dot
-		state_y_dot = float(read)
-		self.state_y_dot_label.set_text("%0.2f" % state_y_dot)
+		current_state.y_dot = float(read)
+		self.state_y_dot_label.set_text("%0.2f" % current_state.y_dot)
 		# update z_dot value
 		read = comm.read_until(b']')
 		read = read[:-1]
-		global state_z_dot
-		state_z_dot = float(read)
-		self.state_z_dot_label.set_text("%0.2f" % state_z_dot)
+		current_state.z_dot = float(read)
+		self.state_z_dot_label.set_text("%0.2f" % current_state.z_dot)
 
 		return GLib.SOURCE_CONTINUE
 
@@ -152,7 +146,7 @@ class Handler:
 		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_phi)
 		comm.write(bytes(command_string, 'utf8'))
 
-	def onTrajGoButtonPress(self, button):
+	def onTrajGoButtonPress(self, button): # TODO: Make separate Calculate and Go Buttons
 		traj_x = float(self.traj_to_x_entry.get_text())
 		traj_y = float(self.traj_to_y_entry.get_text())
 		traj_z = float(self.traj_to_z_entry.get_text())

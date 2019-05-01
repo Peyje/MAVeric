@@ -6,7 +6,7 @@ import matplotlib.pyplot as plot
 def draw_traj(waypoint0, waypoint1, trajectory):
     mpl.rcParams['legend.fontsize'] = 10
 
-    t = linspace(0,5,1000)
+    t = linspace(waypoint0.time,waypoint1.time,1000)
     x_path = trajectory[0] * t ** 4 + trajectory[1] * t ** 3 + trajectory[2] * t ** 2 + trajectory[3] * t + trajectory[4]
     y_path = trajectory[5] * t ** 4 + trajectory[6] * t ** 3 + trajectory[7] * t ** 2 + trajectory[8] * t + trajectory[9]
     z_path = trajectory[10] * t ** 4 + trajectory[11] * t ** 3 + trajectory[12] * t ** 2 + trajectory[13] * t + trajectory[14]
@@ -17,6 +17,8 @@ def draw_traj(waypoint0, waypoint1, trajectory):
     ax.plot(x_path, y_path, z_path, label='3D Trajectory') # plot trajectory
     ax.plot([waypoint0.x],[waypoint0.y],[waypoint0.z],'ro') # plot start
     ax.plot([waypoint1.x], [waypoint1.y], [waypoint1.z], 'ro') # plot end
+    plot.figtext(0,0,'Planned Trajectory:\n (X,Y,Z,Phi,X_dot,Y_dot,Z_dot)\n Start: (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f,%0.2f, %0.2f)\n End: (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' \
+                 %(waypoint0.x, waypoint0.y, waypoint0.z, waypoint0.phi, waypoint0.x_dot,waypoint0.y_dot,waypoint0.z_dot,waypoint1.x, waypoint1.y, waypoint1.z, waypoint1.phi, waypoint1.x_dot,waypoint1.y_dot,waypoint1.z_dot))
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
