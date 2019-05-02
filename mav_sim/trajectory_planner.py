@@ -106,32 +106,49 @@ def planner(state, traj_x, traj_y, traj_z, traj_phi):
     A[10,12] = 2 * waypoint0.time
     A[10,13] = 1
     A[10,14] = 0
-    # end velocity constraints TODO: Like in Matlab example, but why?
-    A[11,0] = cos(waypoint1.phi) * 4 * waypoint1.time ** 3
-    A[11,1] = cos(waypoint1.phi) * 3 * waypoint1.time ** 2
-    A[11,2] = cos(waypoint1.phi) * 2 * waypoint1.time
-    A[11,3] = cos(waypoint1.phi)
-    A[11,4] = 0
-    A[11,5] = sin(waypoint1.phi) * 4 * waypoint1.time ** 3
-    A[11,6] = sin(waypoint1.phi) * 3 * waypoint1.time ** 2
-    A[11,7] = sin(waypoint1.phi) * 2 * waypoint1.time
-    A[11,8] = sin(waypoint1.phi)
-    A[11,9] = 0
-    A[12,0] = sin(waypoint1.phi) * 4 * waypoint1.time ** 3
-    A[12,1] = sin(waypoint1.phi) * 3 * waypoint1.time ** 2
-    A[12,2] = sin(waypoint1.phi) * 2 * waypoint1.time
-    A[12,3] = sin(waypoint1.phi)
-    A[12,4] = 0
-    A[12,5] = -1 * cos(waypoint1.phi) * 4 * waypoint1.time ** 3
-    A[12,6] = -1 * cos(waypoint1.phi) * 3 * waypoint1.time ** 2
-    A[12,7] = -1 * cos(waypoint1.phi) * 2 * waypoint1.time
-    A[12,8] = -1 * cos(waypoint1.phi)
-    A[12,9] = 0
-    A[13,10] = 4 * waypoint1.time ** 3
-    A[13,11] = 3 * waypoint1.time ** 2
-    A[13,12] = 2 * waypoint1.time
-    A[13,13] = 1
-    A[13,14] = 0
+    # end velocity constraints
+    A[11, 0] = 4 * waypoint1.time ** 3
+    A[11, 1] = 3 * waypoint1.time ** 2
+    A[11, 2] = 2 * waypoint1.time
+    A[11, 3] = 1
+    A[11, 4] = 0
+    A[12, 5] = 4 * waypoint1.time ** 3
+    A[12, 6] = 3 * waypoint1.time ** 2
+    A[12, 7] = 2 * waypoint1.time
+    A[12, 8] = 1
+    A[12, 9] = 0
+    A[13, 10] = 4 * waypoint1.time ** 3
+    A[13, 11] = 3 * waypoint1.time ** 2
+    A[13, 12] = 2 * waypoint1.time
+    A[13, 13] = 1
+    A[13, 14] = 0
+
+    # THIS ARE THE end velocity constraints of the Matlab example, they use velocity in body frame!
+    #A[11,0] = cos(waypoint1.phi) * 4 * waypoint1.time ** 3
+    #A[11,1] = cos(waypoint1.phi) * 3 * waypoint1.time ** 2
+    #A[11,2] = cos(waypoint1.phi) * 2 * waypoint1.time
+    #A[11,3] = cos(waypoint1.phi)
+    #A[11,4] = 0
+    #A[11,5] = sin(waypoint1.phi) * 4 * waypoint1.time ** 3
+    #A[11,6] = sin(waypoint1.phi) * 3 * waypoint1.time ** 2
+    #A[11,7] = sin(waypoint1.phi) * 2 * waypoint1.time
+    #A[11,8] = sin(waypoint1.phi)
+    #A[11,9] = 0
+    #A[12,0] = sin(waypoint1.phi) * 4 * waypoint1.time ** 3
+    #A[12,1] = sin(waypoint1.phi) * 3 * waypoint1.time ** 2
+    #A[12,2] = sin(waypoint1.phi) * 2 * waypoint1.time
+    #A[12,3] = sin(waypoint1.phi)
+    #A[12,4] = 0
+    #A[12,5] = -1 * cos(waypoint1.phi) * 4 * waypoint1.time ** 3
+    #A[12,6] = -1 * cos(waypoint1.phi) * 3 * waypoint1.time ** 2
+    #A[12,7] = -1 * cos(waypoint1.phi) * 2 * waypoint1.time
+    #A[12,8] = -1 * cos(waypoint1.phi)
+    #A[12,9] = 0
+    #A[13,10] = 4 * waypoint1.time ** 3
+    #A[13,11] = 3 * waypoint1.time ** 2
+    #A[13,12] = 2 * waypoint1.time
+    #A[13,13] = 1
+    #A[13,14] = 0
 
     A = csc_matrix(A)  # convert to CSC for performance
 
@@ -162,3 +179,4 @@ def planner(state, traj_x, traj_y, traj_z, traj_phi):
     trajectory = solve_qp(P, q, G, h, A, b, solver="osqp") # solver = "quadprog" (default), "cvxpy", "osqp"
     print("QP solution:", trajectory )
     draw.draw_traj(waypoint0, waypoint1, trajectory)
+    return trajectory
