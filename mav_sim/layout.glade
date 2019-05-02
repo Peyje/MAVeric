@@ -557,7 +557,6 @@
               <object class="GtkLabel" id="goto_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">6</property>
                 <property name="label" translatable="yes">GoTo (internal PD)</property>
                 <property name="justify">center</property>
                 <attributes>
@@ -572,20 +571,10 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator" id="sep">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">2</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkFrame" id="traj_frame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label_xalign">0</property>
+            <property name="label_xalign">0.5</property>
             <property name="shadow_type">in</property>
             <child>
               <object class="GtkAlignment">
@@ -701,10 +690,25 @@
                       <object class="GtkButton" id="traj_go_button">
                         <property name="label" translatable="yes">Go!</property>
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="halign">center</property>
                         <signal name="clicked" handler="onTrajGoButtonPress" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">5</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="traj_calc_button">
+                        <property name="label" translatable="yes">Calculate!</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="onTrajCalcButtonPress" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -720,7 +724,6 @@
               <object class="GtkLabel" id="traj_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">6</property>
                 <property name="label" translatable="yes">Trajectory Planner</property>
                 <property name="justify">center</property>
                 <attributes>
@@ -733,6 +736,20 @@
             <property name="left_attach">0</property>
             <property name="top_attach">4</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Press 'h' while in simulation for help regarding the camera</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">5</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>

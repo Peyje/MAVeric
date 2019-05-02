@@ -39,8 +39,8 @@ class Bridge:
 		self.state_q_label = builder.get_object("state_q")
 		self.state_r_label = builder.get_object("state_r")
 
-		# refresh those values every second
-		GLib.timeout_add(100, self.updateState)
+		# refresh those values every 100 ms
+		#GLib.timeout_add(100, self.updateState)
 		self.updateState()
 
 	# update state values from telnet connection
@@ -138,6 +138,9 @@ class Handler:
 		self.traj_to_z_entry = builder.get_object("traj_to_z")
 		self.traj_to_phi_entry = builder.get_object("traj_to_phi")
 
+		# get Go button from Trajectory Planner to set sensitive after calculating
+		self.button_go_traj = builder.get_object("traj_go_button")
+
 	def onGoToButtonPress(self, button):
 		goto_x = self.goto_x_entry.get_text()
 		goto_y = self.goto_y_entry.get_text()
@@ -146,13 +149,13 @@ class Handler:
 		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_phi)
 		comm.write(bytes(command_string, 'utf8'))
 
-	def onTrajGoButtonPress(self, button): # TODO: Make separate Calculate and Go Buttons
+	def onTrajCalcButtonPress(self, button): # TODO: Make separate Calculate and Go Buttons
 		traj_x = float(self.traj_to_x_entry.get_text())
 		traj_y = float(self.traj_to_y_entry.get_text())
 		traj_z = float(self.traj_to_z_entry.get_text())
 		traj_phi = float(self.traj_to_phi_entry.get_text())
-		trajectory_planner.planner(current_state, traj_x, traj_y, traj_z, traj_phi)
-
+		trajectory = trajectory_planner.planner(current_state, traj_x, traj_y, traj_z, traj_phi)
+		self.button_go_traj.set_sensitive(True)
 
 # MAIN
 if __name__ == "__main__":
