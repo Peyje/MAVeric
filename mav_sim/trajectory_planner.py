@@ -177,6 +177,6 @@ def planner(state, traj_x, traj_y, traj_z, traj_phi):
     b = hstack(b)  # convert to hstack for performance
 
     trajectory = solve_qp(P, q, G, h, A, b, solver="osqp") # solver = "quadprog" (default), "cvxpy", "osqp"
-    print("QP solution:", trajectory )
+    print("QP solution:", trajectory)
     draw.draw_traj(waypoint0, waypoint1, trajectory)
-    return trajectory
+    return (waypoint0, waypoint1, trajectory)

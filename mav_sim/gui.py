@@ -1,6 +1,8 @@
 import telnetlib
 import gi
 import trajectory_planner
+import control
+from numpy import *
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -40,7 +42,7 @@ class Bridge:
 		self.state_r_label = builder.get_object("state_r")
 
 		# refresh those values every 100 ms
-		#GLib.timeout_add(100, self.updateState)
+		GLib.timeout_add(50, self.updateState)
 		self.updateState()
 
 	# update state values from telnet connection
@@ -122,6 +124,46 @@ class Bridge:
 
 		return GLib.SOURCE_CONTINUE
 
+# this class saves the current trajectory and invokes the following of said trajectory
+class Trajectory:
+	def __init__(self, planner_out):
+		# extract data from planner output
+		self.waypoint0 = planner_out[0]
+		self.waypoint1 = planner_out[1]
+		self.trajectory = planner_out[2]
+
+		# save time, x, y, z and phi functions
+		self.t = linspace(self.waypoint0.time, self.waypoint1.time, (self.waypoint1.time-self.waypoint0.time)*20)
+		self.x_path = self.trajectory[0] * self.t ** 4 + self.trajectory[1] * self.t ** 3 + self.trajectory[2] * self.t ** 2 + self.trajectory[3] * self.t + self.trajectory[4]
+		self.y_path = self.trajectory[5] * self.t ** 4 + self.trajectory[6] * self.t ** 3 + self.trajectory[7] * self.t ** 2 + self.trajectory[8] * self.t + self.trajectory[9]
+		self.z_path = self.trajectory[10] * self.t ** 4 + self.trajectory[11] * self.t ** 3 + self.trajectory[12] * self.t ** 2 + self.trajectory[13] * self.t + self.trajectory[14]
+		self.phi_path = self.trajectory[15] * self.t ** 2 + self.trajectory[16] * self.t + self.trajectory[17]
+
+		# control variable for update loop
+		self.i = 0
+
+		# set up control object
+		self.control = control.Control(self.x_path, self.y_path, self.z_path, self.phi_path)
+
+	# start following trajectory
+	def start(self):
+		GLib.timeout_add(50, self.updateSpeeds)
+		self.updateSpeeds()
+
+	# calculate and set speed for rotors
+	def updateSpeeds(self):
+		# if end is reached (and time reached end.time) stop calling
+		if self.i == self.t.shape[0]:
+			return False
+
+		# calculate next speeds
+		speeds = self.control.nextUp(self.t[self.i], current_state)
+
+		# TODO: comm them
+
+
+		self.i = self.i + 1
+		return GLib.SOURCE_CONTINUE
 
 # handler class for GUI
 class Handler:
@@ -141,6 +183,8 @@ class Handler:
 		# get Go button from Trajectory Planner to set sensitive after calculating
 		self.button_go_traj = builder.get_object("traj_go_button")
 
+		self.trajectory = None
+
 	def onGoToButtonPress(self, button):
 		goto_x = self.goto_x_entry.get_text()
 		goto_y = self.goto_y_entry.get_text()
@@ -149,13 +193,19 @@ class Handler:
 		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_phi)
 		comm.write(bytes(command_string, 'utf8'))
 
-	def onTrajCalcButtonPress(self, button): # TODO: Make separate Calculate and Go Buttons
+	def onTrajCalcButtonPress(self, button):
 		traj_x = float(self.traj_to_x_entry.get_text())
 		traj_y = float(self.traj_to_y_entry.get_text())
 		traj_z = float(self.traj_to_z_entry.get_text())
 		traj_phi = float(self.traj_to_phi_entry.get_text())
-		trajectory = trajectory_planner.planner(current_state, traj_x, traj_y, traj_z, traj_phi)
+
+		# calculate trajectory and save as new Trajectory object
+		self.trajectory = Trajectory(trajectory_planner.planner(current_state, traj_x, traj_y, traj_z, traj_phi))
+		# enable go button
 		self.button_go_traj.set_sensitive(True)
+
+	def onTrajGoButtonPress(self, button):
+		self.trajectory.start()
 
 # MAIN
 if __name__ == "__main__":

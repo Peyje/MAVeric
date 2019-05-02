@@ -6,7 +6,7 @@ import matplotlib.pyplot as plot
 def draw_traj(waypoint0, waypoint1, trajectory):
     mpl.rcParams['legend.fontsize'] = 10
 
-    t = linspace(waypoint0.time,waypoint1.time,1000)
+    t = linspace(waypoint0.time,waypoint1.time, (waypoint1.time-waypoint0.time)*20)
     x_path = trajectory[0] * t ** 4 + trajectory[1] * t ** 3 + trajectory[2] * t ** 2 + trajectory[3] * t + trajectory[4]
     y_path = trajectory[5] * t ** 4 + trajectory[6] * t ** 3 + trajectory[7] * t ** 2 + trajectory[8] * t + trajectory[9]
     z_path = trajectory[10] * t ** 4 + trajectory[11] * t ** 3 + trajectory[12] * t ** 2 + trajectory[13] * t + trajectory[14]
