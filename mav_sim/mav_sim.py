@@ -15,9 +15,9 @@ mav.append(pose_sensor)
 velocity_sensor = Velocity()
 mav.append(velocity_sensor)
 
-# create actuator for force & torque
-ft_actuator = ForceTorque()
-mav.append(ft_actuator)
+# create actuator for dynamic flight
+dynamic_actuator = QuadrotorDynamicControl()
+mav.append(dynamic_actuator)
 
 # create another actuator for setting waypoints
 waypoint_actuator = RotorcraftWaypoint()
@@ -26,7 +26,7 @@ mav.append(waypoint_actuator)
 # set up comms
 pose_sensor.add_interface('socket')
 velocity_sensor.add_interface('socket')
-ft_actuator.add_interface('socket')
+dynamic_actuator.add_interface('socket')
 waypoint_actuator.add_service('socket')
  
 # set up environment
