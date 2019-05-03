@@ -1,4 +1,5 @@
 from morse.builder import *
+from simulation.builder.actuators import Dyncallable
 
 # creates a new instance of the robot
 mav = Quadrotor()
@@ -15,9 +16,9 @@ mav.append(pose_sensor)
 velocity_sensor = Velocity()
 mav.append(velocity_sensor)
 
-# create actuator for dynamic flight
-dynamic_actuator = QuadrotorDynamicControl()
-mav.append(dynamic_actuator)
+# create actuator for dynamic flight (the extended one which is callable)
+dyn_callable = Dyncallable()
+mav.append(dyn_callable)
 
 # create another actuator for setting waypoints
 waypoint_actuator = RotorcraftWaypoint()
@@ -26,7 +27,7 @@ mav.append(waypoint_actuator)
 # set up comms
 pose_sensor.add_interface('socket')
 velocity_sensor.add_interface('socket')
-dynamic_actuator.add_interface('socket')
+dyn_callable.add_interface('socket')
 waypoint_actuator.add_service('socket')
  
 # set up environment
