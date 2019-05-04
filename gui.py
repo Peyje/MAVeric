@@ -8,6 +8,11 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GLib
 
+# variables for radio switch
+radioPD = True
+radioMatlab = False
+radioMellinger = False
+
 # class to save current state of MAV
 class State:
 	def __init__(self):
@@ -150,14 +155,41 @@ class Trajectory:
 	def updateSpeeds(self):
 		# if end is reached (and time reached end.time) stop calling
 		if self.i == self.t.shape[0]:
+			button_go_traj = builder.get_object("traj_go_button")
+			button_go_traj.set_sensitive(False)
 			return False
 
-		# calculate next speeds
-		speeds = self.control.nextUpEasy(self.i, current_state, self.waypoint1)
+		# take controller that was chosen in GUI
+		if radioPD:
+			# ======================= PD ==============================
+			point = self.control.nextUpPD(self.i)
+			command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (point[0], point[1], point[2], point[3])
+			comm.write(bytes(command_string, 'utf8'))
+			# =================== end of PD ===========================
 
-		# comm them TODO: UnCOMMent
-		#command_string = 'id1 mav.dyn_callable setspeed [%s, %s, %s, %s] \n' % (speeds[0], speeds[1], speeds[2], speeds[3])
-		#comm.write(bytes(command_string, 'utf8'))
+		elif radioMatlab:
+			print("Not implemented yet, sorry")
+			# ==================== Matlab =============================
+			# calculate next speeds
+			# speeds = self.control.nextUpEasy(self.i, current_state, self.waypoint1)
+
+			# comm them
+			# command_string = 'id1 mav.dyn_callable setspeed [%s, %s, %s, %s] \n' % (speeds[0], speeds[1], speeds[2], speeds[3])
+			# comm.write(bytes(command_string, 'utf8'))
+			# ================= end of Matlab =========================
+
+		elif radioMellinger:
+			print("Not implemented yet, sorry")
+			# =================== Mellinger ===========================
+			# calculate next speeds
+			#speeds = self.control.nextUp(self.i, current_state)
+
+			# comm them
+			#command_string = 'id1 mav.dyn_callable setspeed [%s, %s, %s, %s] \n' % (speeds[0], speeds[1], speeds[2], speeds[3])
+			#comm.write(bytes(command_string, 'utf8'))
+			# ================ end of Mellinger =======================
+
+
 
 		self.i = self.i + 1
 		return GLib.SOURCE_CONTINUE
@@ -211,6 +243,19 @@ class Handler:
 	def onSwitchActivate(self, button, state):
 		command_string = 'id1 mav.waypoint_actuator switch_hold \n'
 		comm.write(bytes(command_string, 'utf8'))
+
+	def onRadioPD(self, button):
+		global radioPD
+		radioPD = not radioPD
+
+	def onRadioMatlab(self, button):
+		global radioMatlab
+		radioMatlab = not radioMatlab
+
+	def onRadioMellinger(self, button):
+		global radioMellinger
+		radioMellinger = not radioMellinger
+
 
 
 # MAIN
