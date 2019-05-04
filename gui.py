@@ -42,7 +42,7 @@ class Bridge:
 		self.state_r_label = builder.get_object("state_r")
 
 		# refresh those values every 100 ms
-		GLib.timeout_add(50, self.updateState)
+		#GLib.timeout_add(50, self.updateState)
 		self.updateState()
 
 	# update state values from telnet connection
@@ -132,18 +132,14 @@ class Trajectory:
 		self.waypoint1 = planner_out[1]
 		self.trajectory = planner_out[2]
 
-		# save time, x, y, z and phi functions
-		self.t = linspace(self.waypoint0.time, self.waypoint1.time, (self.waypoint1.time-self.waypoint0.time)*20)
-		self.x_path = self.trajectory[0] * self.t ** 4 + self.trajectory[1] * self.t ** 3 + self.trajectory[2] * self.t ** 2 + self.trajectory[3] * self.t + self.trajectory[4]
-		self.y_path = self.trajectory[5] * self.t ** 4 + self.trajectory[6] * self.t ** 3 + self.trajectory[7] * self.t ** 2 + self.trajectory[8] * self.t + self.trajectory[9]
-		self.z_path = self.trajectory[10] * self.t ** 4 + self.trajectory[11] * self.t ** 3 + self.trajectory[12] * self.t ** 2 + self.trajectory[13] * self.t + self.trajectory[14]
-		self.phi_path = self.trajectory[15] * self.t ** 2 + self.trajectory[16] * self.t + self.trajectory[17]
+		# create array of times (every 50ms)
+		self.t = linspace(self.waypoint0.time, self.waypoint1.time, (self.waypoint1.time - self.waypoint0.time) * 20)
 
 		# control variable for update loop
 		self.i = 0
 
 		# set up control object
-		self.control = control.Control(self.x_path, self.y_path, self.z_path, self.phi_path)
+		self.control = control.Control(self.trajectory, self.t)
 
 	# start following trajectory
 	def start(self):
@@ -157,10 +153,11 @@ class Trajectory:
 			return False
 
 		# calculate next speeds
-		speeds = self.control.nextUp(self.t[self.i], current_state)
+		speeds = self.control.nextUpEasy(self.i, current_state, self.waypoint1)
 
-		# TODO: comm them
-
+		# comm them TODO: UnCOMMent
+		#command_string = 'id1 mav.dyn_callable setspeed [%s, %s, %s, %s] \n' % (speeds[0], speeds[1], speeds[2], speeds[3])
+		#comm.write(bytes(command_string, 'utf8'))
 
 		self.i = self.i + 1
 		return GLib.SOURCE_CONTINUE
@@ -182,6 +179,10 @@ class Handler:
 
 		# get Go button from Trajectory Planner to set sensitive after calculating
 		self.button_go_traj = builder.get_object("traj_go_button")
+
+		# get Toggle Hold button to show corresponding status
+		self.button_hold = builder.get_object("hold_button")
+		self.hold = True
 
 		self.trajectory = None
 
@@ -206,6 +207,11 @@ class Handler:
 
 	def onTrajGoButtonPress(self, button):
 		self.trajectory.start()
+
+	def onSwitchActivate(self, button, state):
+		command_string = 'id1 mav.waypoint_actuator switch_hold \n'
+		comm.write(bytes(command_string, 'utf8'))
+
 
 # MAIN
 if __name__ == "__main__":

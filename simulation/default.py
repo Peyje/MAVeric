@@ -1,11 +1,12 @@
 from morse.builder import *
-from simulation.builder.actuators import Dyncallable
+from simulation.builder.actuators import Dyncallable, Waypointswitchable
 
 # creates a new instance of the robot
 mav = Quadrotor()
+#mav.set_mass(0.028)
 
 # place mav at an initial location
-mav.translate(0.0, 0.0, 2.0)
+mav.translate(0.0, 0.0, 2)
 mav.rotate(0.0, 0.0, 0.0)
 
 # create sensor for pose
@@ -21,7 +22,7 @@ dyn_callable = Dyncallable()
 mav.append(dyn_callable)
 
 # create another actuator for setting waypoints
-waypoint_actuator = RotorcraftWaypoint()
+waypoint_actuator = Waypointswitchable()
 mav.append(waypoint_actuator)
 
 # set up comms
