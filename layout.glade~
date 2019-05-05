@@ -780,7 +780,7 @@
                         <property name="receives_default">False</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="onRadioPD" swapped="no"/>
+                        <signal name="clicked" handler="onRadioPD" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -790,7 +790,7 @@
                     </child>
                     <child>
                       <object class="GtkRadioButton" id="radio_2">
-                        <property name="label" translatable="yes">Not yet usable</property>
+                        <property name="label" translatable="yes">Matlab Control</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -798,7 +798,6 @@
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">radio_1</property>
-                        <signal name="toggled" handler="onRadioMatlab" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -808,7 +807,7 @@
                     </child>
                     <child>
                       <object class="GtkRadioButton" id="radio_3">
-                        <property name="label" translatable="yes">Not yet usable</property>
+                        <property name="label" translatable="yes">Mellinger Control</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -816,7 +815,6 @@
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">radio_1</property>
-                        <signal name="toggled" handler="onRadioMellinger" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
