@@ -1,0 +1,5 @@
+numpy >= 1.16.0
+scipy >= 1.2.1
+matplotlib >= 3.0.3
+qpsolvers >= 1.0.5
+osqp >= 0.5.0
