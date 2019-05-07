@@ -47,7 +47,7 @@ class Bridge:
 		self.state_r_label = builder.get_object("state_r")
 
 		# refresh those values every 100 ms
-		#GLib.timeout_add(50, self.updateState)
+		GLib.timeout_add(50, self.updateState)
 		self.updateState()
 
 	# update state values from telnet connection
