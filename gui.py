@@ -10,10 +10,11 @@ from gi.repository import GLib
 
 # variables for radio switch
 radioPD = True
-radioMatlab = False
-radioMellinger = False
+radioSimple = False
+radioErrorCorrection = False
 
-# class to save current state of MAV
+
+# class to save current state of MAV into
 class State:
 	def __init__(self):
 		self.x = 0.0
@@ -29,7 +30,8 @@ class State:
 		self.q = 0.0
 		self.r = 0.0
 
-# this class saves the current state of the MAV
+
+# this class retrieves and stores the current state of MAV
 class Bridge:
 	def __init__(self):
 		# retrieve labels for state
@@ -129,6 +131,7 @@ class Bridge:
 
 		return GLib.SOURCE_CONTINUE
 
+
 # this class saves the current trajectory and invokes the following of said trajectory
 class Trajectory:
 	def __init__(self, planner_out):
@@ -167,7 +170,7 @@ class Trajectory:
 			comm.write(bytes(command_string, 'utf8'))
 			# =================== end of PD ===========================
 
-		elif radioMatlab:
+		elif radioSimple:
 			print("Not implemented yet, sorry")
 			# ==================== Matlab =============================
 			# calculate next speeds
@@ -178,7 +181,7 @@ class Trajectory:
 			# comm.write(bytes(command_string, 'utf8'))
 			# ================= end of Matlab =========================
 
-		elif radioMellinger:
+		elif radioErrorCorrection:
 			print("Not implemented yet, sorry")
 			# =================== Mellinger ===========================
 			# calculate next speeds
@@ -189,10 +192,9 @@ class Trajectory:
 			#comm.write(bytes(command_string, 'utf8'))
 			# ================ end of Mellinger =======================
 
-
-
 		self.i = self.i + 1
 		return GLib.SOURCE_CONTINUE
+
 
 # handler class for GUI
 class Handler:
@@ -216,7 +218,7 @@ class Handler:
 		self.button_hold = builder.get_object("hold_button")
 		self.hold = True
 
-		self.trajectory = None
+		self.trajectory = None  # no trajectory calculated at first
 
 	def onGoToButtonPress(self, button):
 		goto_x = self.goto_x_entry.get_text()
@@ -249,13 +251,12 @@ class Handler:
 		radioPD = not radioPD
 
 	def onRadioMatlab(self, button):
-		global radioMatlab
-		radioMatlab = not radioMatlab
+		global radioSimple
+		radioSimple = not radioSimple
 
 	def onRadioMellinger(self, button):
-		global radioMellinger
-		radioMellinger = not radioMellinger
-
+		global radioErrorCorrection
+		radioErrorCorrection = not radioErrorCorrection
 
 
 # MAIN

@@ -3,7 +3,7 @@ from simulation.builder.actuators import Dyncallable, Waypointswitchable
 
 # creates a new instance of the robot
 mav = Quadrotor()
-#mav.set_mass(0.028) # real mass of Craziefly drone is too light for simulation
+# mav.set_mass(0.028) # real mass of Craziefly drone is too light for simulation
 
 # place mav at an initial location
 mav.translate(0.0, 0.0, 2)

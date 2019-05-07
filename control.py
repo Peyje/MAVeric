@@ -3,11 +3,13 @@ from numpy import *
 import math
 from scipy.spatial.transform import Rotation as R
 
-class Dim3_error:
-    def __init__(self, sx, sy, sz, tx, ty ,tz):
+
+class dim3Error:
+    def __init__(self, sx, sy, sz, tx, ty, tz):
         self.x = sx - tx
         self.y = sy - ty
         self.z = sz - tz
+
 
 # a control objects saves the trajectory to follow and calculates the next step of corresponding rotor speeds
 class Control:
@@ -36,20 +38,17 @@ class Control:
         self.y_ddot_path = 12 * trajectory[5] * t ** 2 + 6 * trajectory[6] * t + 2 * trajectory[7]
         self.z_ddot_path = 12 * trajectory[10] * t ** 2 + 6 * trajectory[11] * t + 2 * trajectory[12]
 
-
     # just send the next position to go to
     def nextUpPD(self, step):
         return self.x_path[step], self.y_path[step], self.z_path[step], self.phi_path[step]
 
-
     # calculate next rotor speeds (Mellinger controller)
     def nextUp(self, step, state):
-        error_p = Dim3_error(state.x, state.y, state.z, self.x_path[step], self.y_path[step], self.z_path[step])
-        error_v = Dim3_error(state.x_dot, state.y_dot, state.z_dot, self.x_dot_path[step], self.y_dot_path[step], self.z_dot_path[step])
+        error_p = dim3Error(state.x, state.y, state.z, self.x_path[step], self.y_path[step], self.z_path[step])
+        error_v = dim3Error(state.x_dot, state.y_dot, state.z_dot, self.x_dot_path[step], self.y_dot_path[step], self.z_dot_path[step])
 
         # TODO: Just about everything
-        #print("Moin", step, self.x_path[step], self.y_path[step], self.z_path[step], self.phi_path[step])
-
+        # print("Moin", step, self.x_path[step], self.y_path[step], self.z_path[step], self.phi_path[step])
 
     # controller based on Matlab example
     def nextUpEasy(self, step, state, waypoint1):

@@ -3,8 +3,9 @@ from scipy.sparse import csc_matrix
 from qpsolvers import solve_qp
 import draw
 
+
 class Waypoint:
-    def __init__(self, x, y ,z, phi, x_dot, y_dot, z_dot, time):
+    def __init__(self, x, y, z, phi, x_dot, y_dot, z_dot, time):
         self.x = x
         self.y = y
         self.z = z
@@ -22,11 +23,10 @@ def planner(state, traj_x, traj_y, traj_z, traj_phi):
     # =============================
     # Identity matrix for main part of QP (normally the Hesse matrix, but this is a least squared problem)
     # =============================
-    # P_numpy = eye(18)
-    P_numpy = zeros((18, 18))  # TODO: Matlab example is not a full identity matrix, why?
+    P_numpy = zeros((18, 18))
     P_numpy[0, 0] = 1
     P_numpy[5, 5] = 1
-    P_numpy[10, 10] = 10000
+    P_numpy[10, 10] = 1
     P_numpy[15, 15] = 1
     P = csc_matrix(P_numpy)  # convert to CSC for performance
 
@@ -91,21 +91,21 @@ def planner(state, traj_x, traj_y, traj_z, traj_phi):
     A[7, 16] = waypoint1.time
     A[7, 17] = 1
     # start velocity constraints
-    A[8,0] = 4 * waypoint0.time ** 3
-    A[8,1] = 3 * waypoint0.time ** 2
-    A[8,2] = 2 * waypoint0.time
-    A[8,3] = 1
-    A[8,4] = 0
-    A[9,5] = 4 * waypoint0.time ** 3
-    A[9,6] = 3 * waypoint0.time ** 2
-    A[9,7] = 2 * waypoint0.time
-    A[9,8] = 1
-    A[9,9] = 0
-    A[10,10] = 4 * waypoint0.time ** 3
-    A[10,11] = 3 * waypoint0.time ** 2
-    A[10,12] = 2 * waypoint0.time
-    A[10,13] = 1
-    A[10,14] = 0
+    A[8, 0] = 4 * waypoint0.time ** 3
+    A[8, 1] = 3 * waypoint0.time ** 2
+    A[8, 2] = 2 * waypoint0.time
+    A[8, 3] = 1
+    A[8, 4] = 0
+    A[9, 5] = 4 * waypoint0.time ** 3
+    A[9, 6] = 3 * waypoint0.time ** 2
+    A[9, 7] = 2 * waypoint0.time
+    A[9, 8] = 1
+    A[9, 9] = 0
+    A[10, 10] = 4 * waypoint0.time ** 3
+    A[10, 11] = 3 * waypoint0.time ** 2
+    A[10, 12] = 2 * waypoint0.time
+    A[10, 13] = 1
+    A[10, 14] = 0
     # end velocity constraints
     A[11, 0] = 4 * waypoint1.time ** 3
     A[11, 1] = 3 * waypoint1.time ** 2
@@ -122,33 +122,6 @@ def planner(state, traj_x, traj_y, traj_z, traj_phi):
     A[13, 12] = 2 * waypoint1.time
     A[13, 13] = 1
     A[13, 14] = 0
-
-    # THIS ARE THE end velocity constraints of the Matlab example, they use velocity in body frame!
-    #A[11,0] = cos(waypoint1.phi) * 4 * waypoint1.time ** 3
-    #A[11,1] = cos(waypoint1.phi) * 3 * waypoint1.time ** 2
-    #A[11,2] = cos(waypoint1.phi) * 2 * waypoint1.time
-    #A[11,3] = cos(waypoint1.phi)
-    #A[11,4] = 0
-    #A[11,5] = sin(waypoint1.phi) * 4 * waypoint1.time ** 3
-    #A[11,6] = sin(waypoint1.phi) * 3 * waypoint1.time ** 2
-    #A[11,7] = sin(waypoint1.phi) * 2 * waypoint1.time
-    #A[11,8] = sin(waypoint1.phi)
-    #A[11,9] = 0
-    #A[12,0] = sin(waypoint1.phi) * 4 * waypoint1.time ** 3
-    #A[12,1] = sin(waypoint1.phi) * 3 * waypoint1.time ** 2
-    #A[12,2] = sin(waypoint1.phi) * 2 * waypoint1.time
-    #A[12,3] = sin(waypoint1.phi)
-    #A[12,4] = 0
-    #A[12,5] = -1 * cos(waypoint1.phi) * 4 * waypoint1.time ** 3
-    #A[12,6] = -1 * cos(waypoint1.phi) * 3 * waypoint1.time ** 2
-    #A[12,7] = -1 * cos(waypoint1.phi) * 2 * waypoint1.time
-    #A[12,8] = -1 * cos(waypoint1.phi)
-    #A[12,9] = 0
-    #A[13,10] = 4 * waypoint1.time ** 3
-    #A[13,11] = 3 * waypoint1.time ** 2
-    #A[13,12] = 2 * waypoint1.time
-    #A[13,13] = 1
-    #A[13,14] = 0
 
     A = csc_matrix(A)  # convert to CSC for performance
 
@@ -167,16 +140,16 @@ def planner(state, traj_x, traj_y, traj_z, traj_phi):
     b[6, 0] = waypoint1.z
     b[7, 0] = waypoint1.phi
     # start velocity constraints
-    b[8,0] = waypoint0.x_dot
-    b[9,0] = waypoint0.y_dot
-    b[10,0] = waypoint0.z_dot
+    b[8, 0] = waypoint0.x_dot
+    b[9, 0] = waypoint0.y_dot
+    b[10, 0] = waypoint0.z_dot
     # end velocity constraints
-    b[11,0] = waypoint1.x_dot
-    b[12,0] = waypoint1.y_dot
-    b[13,0] = waypoint1.z_dot
+    b[11, 0] = waypoint1.x_dot
+    b[12, 0] = waypoint1.y_dot
+    b[13, 0] = waypoint1.z_dot
     b = hstack(b)  # convert to hstack for performance
 
-    trajectory = solve_qp(P, q, G, h, A, b, solver="osqp") # solver = "quadprog" (default), "cvxpy", "osqp"
+    trajectory = solve_qp(P, q, G, h, A, b, solver="osqp")  # solver = "quadprog" (default), "cvxpy", "osqp"
     print("QP solution:", trajectory)
     draw.draw_traj(waypoint0, waypoint1, trajectory)
-    return (waypoint0, waypoint1, trajectory)
+    return waypoint0, waypoint1, trajectory
