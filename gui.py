@@ -8,11 +8,13 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GLib
 
-# variables for radio switch
+# variables for radio switch of controllers
 radioPD = True
 radioSimple = False
 radioErrorCorrection = False
 
+# variable for radio switch of trajectory
+radioJoint = True
 
 # class to save current state of MAV into
 class State:
@@ -129,6 +131,9 @@ class Bridge:
 		current_state.z_dot = float(read)
 		self.state_z_dot_label.set_text("%0.2f" % current_state.z_dot)
 
+		# update first waypoint in GUI
+		waypoints_gui[0] = [0, current_state.x, current_state.y, current_state.z, current_state.phi]
+
 		return GLib.SOURCE_CONTINUE
 
 
@@ -136,18 +141,19 @@ class Bridge:
 class Trajectory:
 	def __init__(self, planner_out):
 		# extract data from planner output
-		self.waypoint0 = planner_out[0]
-		self.waypoint1 = planner_out[1]
-		self.trajectory = planner_out[2]
+		self.waypoints = planner_out[0]
+		self.start_wp = planner_out[0][0]
+		self.end_wp = planner_out[0][-1]
+		self.trajectory = planner_out[1]
 
 		# create array of times (every 50ms)
-		self.t = linspace(self.waypoint0.time, self.waypoint1.time, (self.waypoint1.time - self.waypoint0.time) * 20)
+		self.t = linspace(self.start_wp.time, self.end_wp.time, (self.end_wp.time - self.start_wp.time) * 20)
 
 		# control variable for update loop
 		self.i = 0
 
 		# set up control object
-		self.control = control.Control(self.trajectory, self.t)
+		self.control = control.Control(self.waypoints, self.trajectory)
 
 	# start following trajectory
 	def start(self):
@@ -228,19 +234,32 @@ class Handler:
 		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_phi)
 		comm.write(bytes(command_string, 'utf8'))
 
-	def onTrajCalcButtonPress(self, button):
-		traj_x = float(self.traj_to_x_entry.get_text())
-		traj_y = float(self.traj_to_y_entry.get_text())
-		traj_z = float(self.traj_to_z_entry.get_text())
-		traj_phi = float(self.traj_to_phi_entry.get_text())
+	def onAddButtonPress(self, button):
+		wp_x = float(self.traj_to_x_entry.get_text())
+		wp_y = float(self.traj_to_y_entry.get_text())
+		wp_z = float(self.traj_to_z_entry.get_text())
+		wp_phi = float(self.traj_to_phi_entry.get_text())
 
+		# add waypoint to list
+		waypoints_gui.append([size(waypoints_gui), wp_x, wp_y, wp_z, wp_phi])
+
+		# reset entry fields
+		self.traj_to_x_entry.set_text('')
+		self.traj_to_y_entry.set_text('')
+		self.traj_to_z_entry.set_text('')
+		self.traj_to_phi_entry.set_text('')
+
+	def onTrajCalcButtonPress(self, button):
 		# calculate trajectory and save as new Trajectory object
-		self.trajectory = Trajectory(trajectory_planner.planner(current_state, traj_x, traj_y, traj_z, traj_phi))
+		self.trajectory = Trajectory(trajectory_planner.planner(waypoints_gui, radioJoint))
 		# enable go button
 		self.button_go_traj.set_sensitive(True)
 
 	def onTrajGoButtonPress(self, button):
 		self.trajectory.start()
+		# reset waypoints_gui
+		waypoints_gui.clear()
+		waypoints_gui.append([0, 0, 0, 2, 0])
 
 	def onSwitchActivate(self, button, state):
 		command_string = 'id1 mav.waypoint_actuator switch_hold \n'
@@ -258,6 +277,10 @@ class Handler:
 		global radioErrorCorrection
 		radioErrorCorrection = not radioErrorCorrection
 
+	def onRadioJoint(self, button):
+		global radioJoint
+		radioJoint = not radioJoint
+
 
 # MAIN
 if __name__ == "__main__":
@@ -273,6 +296,10 @@ if __name__ == "__main__":
 	window = builder.get_object("main")
 	window.connect("destroy", Gtk.main_quit)
 	window.show_all()
+
+	# get object that shows current waypoints set for trajectory
+	waypoints_gui = builder.get_object('waypoint_store')
+	waypoints_gui.append([0,0,0,2,0])
 
 	# create state object
 	current_state = State()
