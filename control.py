@@ -11,9 +11,9 @@ class dim3Error:
         self.z = sz - tz
 
 
-# a control objects saves the trajectory to follow and calculates the next step of corresponding rotor speeds
+# a control object saves the trajectory to follow and calculates the next step of corresponding rotor speeds
 class Control:
-    def __init__(self, trajectory, t):
+    def __init__(self, waypoints, trajectory):
         # mass
         self.m = 1
         # gravitational acceleration
@@ -22,21 +22,28 @@ class Control:
         self.k_p = 1
         self.k_v = 1
 
-        # save x, y, z and phi functions
-        self.x_path = trajectory[0] * t ** 4 + trajectory[1] * t ** 3 + trajectory[2] * t ** 2 + trajectory[3] * t + trajectory[4]
-        self.y_path = trajectory[5] * t ** 4 + trajectory[6] * t ** 3 + trajectory[7] * t ** 2 + trajectory[8] * t + trajectory[9]
-        self.z_path = trajectory[10] * t ** 4 + trajectory[11] * t ** 3 + trajectory[12] * t ** 2 + trajectory[13] * t + trajectory[14]
-        self.phi_path = trajectory[15] * t ** 2 + trajectory[16] * t + trajectory[17]
+        self.x_path = []
+        self.y_path = []
+        self.z_path = []
+        self.phi_path = []
 
-        # sae x, y, z velocity functions
-        self.x_dot_path = 4 * trajectory[0] * t ** 3 + 3 * trajectory[1] * t ** 2 + 2 * trajectory[2] * t + trajectory[3]
-        self.y_dot_path = 4 * trajectory[5] * t ** 3 + 3 * trajectory[6] * t ** 2 + 2 * trajectory[7] * t + trajectory[8]
-        self.z_dot_path = 4 * trajectory[10] * t ** 3 + 3 * trajectory[11] * t ** 2 + 2 * trajectory[12] * t + trajectory[13]
+        for i in range(len(trajectory)):
+            t = linspace(waypoints[i].time, waypoints[i + 1].time, (waypoints[i + 1].time - waypoints[i].time) * 20)
+            self.x_path = hstack((self.x_path , trajectory[i][0] * t ** 4 + trajectory[i][1] * t ** 3 + trajectory[i][2] * t ** 2 + trajectory[i][3] * t + trajectory[i][4]))
+            self.y_path = hstack((self.y_path , trajectory[i][5] * t ** 4 + trajectory[i][6] * t ** 3 + trajectory[i][7] * t ** 2 + trajectory[i][8] * t + trajectory[i][9]))
+            self.z_path = hstack((self.z_path , trajectory[i][10] * t ** 4 + trajectory[i][11] * t ** 3 + trajectory[i][12] * t ** 2 + trajectory[i][13] * t + trajectory[i][14]))
+            self.phi_path = hstack((self.phi_path , trajectory[i][15] * t ** 2 + trajectory[i][16] * t + trajectory[i][17]))
+
+
+        # save x, y, z velocity functions
+        #self.x_dot_path = 4 * trajectory[0] * t ** 3 + 3 * trajectory[1] * t ** 2 + 2 * trajectory[2] * t + trajectory[3]
+        #self.y_dot_path = 4 * trajectory[5] * t ** 3 + 3 * trajectory[6] * t ** 2 + 2 * trajectory[7] * t + trajectory[8]
+        #self.z_dot_path = 4 * trajectory[10] * t ** 3 + 3 * trajectory[11] * t ** 2 + 2 * trajectory[12] * t + trajectory[13]
 
         # save x, y, z acceleration functions
-        self.x_ddot_path = 12 * trajectory[0] * t ** 2 + 6 * trajectory[1] * t + 2 * trajectory[2]
-        self.y_ddot_path = 12 * trajectory[5] * t ** 2 + 6 * trajectory[6] * t + 2 * trajectory[7]
-        self.z_ddot_path = 12 * trajectory[10] * t ** 2 + 6 * trajectory[11] * t + 2 * trajectory[12]
+        #self.x_ddot_path = 12 * trajectory[0] * t ** 2 + 6 * trajectory[1] * t + 2 * trajectory[2]
+        #self.y_ddot_path = 12 * trajectory[5] * t ** 2 + 6 * trajectory[6] * t + 2 * trajectory[7]
+        #self.z_ddot_path = 12 * trajectory[10] * t ** 2 + 6 * trajectory[11] * t + 2 * trajectory[12]
 
     # just send the next position to go to
     def nextUpPD(self, step):

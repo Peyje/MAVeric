@@ -1,155 +1,582 @@
 from numpy import *
 from scipy.sparse import csc_matrix
-from qpsolvers import solve_qp
 import draw
-
+import osqp
 
 class Waypoint:
-    def __init__(self, x, y, z, phi, x_dot, y_dot, z_dot, time):
+    def __init__(self, x, y, z, phi, time):
         self.x = x
         self.y = y
         self.z = z
         self.phi = phi
-        self.x_dot = x_dot
-        self.y_dot = y_dot
-        self.z_dot = z_dot
+
         self.time = time
 
+def calc_time(start, end):
+    time = 5 # TODO: Actually calculate time
+    return time
 
-def planner(state, traj_x, traj_y, traj_z, traj_phi):
-    waypoint0 = Waypoint(state.x, state.y, state.z, state.phi, state.x_dot, state.y_dot, state.z_dot, 0)
-    waypoint1 = Waypoint(traj_x, traj_y, traj_z, traj_phi, 0, 0, 0, 5) # TODO: calculate time, don't just assume 5
+def joint(waypoints):
+    # total number of segments
+    numSegments = len(waypoints) - 1
+    # every segment has its own polynomial of 4th degree for X,Y and Z and a polynomial of 2nd degree for Phi
+    numCoefficients = numSegments * (3*5+3)
+    # list of calculated trajectory coefficients
+    trajectory = []
 
-    # =============================
-    # Identity matrix for main part of QP (normally the Hesse matrix, but this is a least squared problem)
-    # =============================
-    P_numpy = zeros((18, 18))
-    P_numpy[0, 0] = 1
-    P_numpy[5, 5] = 1
-    P_numpy[10, 10] = 1
-    P_numpy[15, 15] = 1
+    numConstraints = numSegments * 8 + (numSegments - 1) * 4 + 8
+
+    P_numpy = zeros((numCoefficients, numCoefficients))
+    for i in range(numSegments):
+        P_numpy[0 + i * 18, 0 + i * 18] = 1  # minimize snap for X
+        P_numpy[5 + i * 18, 5 + i * 18] = 1  # minimize snap for Y
+        P_numpy[10 + i * 18, 10 + i * 18] = 1  # minimize snap for Z
+        P_numpy[15 + i * 18, 15 + i * 18] = 1  # minimize acceleration for Phi
     P = csc_matrix(P_numpy)  # convert to CSC for performance
 
     # =============================
     # Gradient vector (linear terms), we have none
     # =============================
-    q = zeros((18, 1))
+    q = zeros((numCoefficients, 1))
     q = hstack(q)  # convert to hstack for performance
 
     # =============================
     # Inequality matrix (left side), we have none
     # =============================
-    G = zeros((14, 18))
-    G = csc_matrix(G)  # convert to CSC for performance
+    G = zeros((numConstraints, numCoefficients))
 
     # =============================
     # Inequality vector (right side), we have none
     # =============================
-    h = zeros((14, 1))
+    h = zeros((numConstraints, 1))
     h = hstack(h)  # convert to hstack for performance
 
     # =============================
     # Equality matrix (left side)
     # =============================
-    A = zeros((14, 18))
-    # start position and yaw constraints
-    A[0, 0] = waypoint0.time ** 4
-    A[0, 1] = waypoint0.time ** 3
-    A[0, 2] = waypoint0.time ** 2
-    A[0, 3] = waypoint0.time
-    A[0, 4] = 1
-    A[1, 5] = waypoint0.time ** 4
-    A[1, 6] = waypoint0.time ** 3
-    A[1, 7] = waypoint0.time ** 2
-    A[1, 8] = waypoint0.time
-    A[1, 9] = 1
-    A[2, 10] = waypoint0.time ** 4
-    A[2, 11] = waypoint0.time ** 3
-    A[2, 12] = waypoint0.time ** 2
-    A[2, 13] = waypoint0.time
-    A[2, 14] = 1
-    A[3, 15] = waypoint0.time ** 2
-    A[3, 16] = waypoint0.time
-    A[3, 17] = 1
-    # end position and yaw constraints
-    A[4, 0] = waypoint1.time ** 4
-    A[4, 1] = waypoint1.time ** 3
-    A[4, 2] = waypoint1.time ** 2
-    A[4, 3] = waypoint1.time
-    A[4, 4] = 1
-    A[5, 5] = waypoint1.time ** 4
-    A[5, 6] = waypoint1.time ** 3
-    A[5, 7] = waypoint1.time ** 2
-    A[5, 8] = waypoint1.time
-    A[5, 9] = 1
-    A[6, 10] = waypoint1.time ** 4
-    A[6, 11] = waypoint1.time ** 3
-    A[6, 12] = waypoint1.time ** 2
-    A[6, 13] = waypoint1.time
-    A[6, 14] = 1
-    A[7, 15] = waypoint1.time ** 2
-    A[7, 16] = waypoint1.time
-    A[7, 17] = 1
-    # start velocity constraints
-    A[8, 0] = 4 * waypoint0.time ** 3
-    A[8, 1] = 3 * waypoint0.time ** 2
-    A[8, 2] = 2 * waypoint0.time
-    A[8, 3] = 1
-    A[8, 4] = 0
-    A[9, 5] = 4 * waypoint0.time ** 3
-    A[9, 6] = 3 * waypoint0.time ** 2
-    A[9, 7] = 2 * waypoint0.time
-    A[9, 8] = 1
-    A[9, 9] = 0
-    A[10, 10] = 4 * waypoint0.time ** 3
-    A[10, 11] = 3 * waypoint0.time ** 2
-    A[10, 12] = 2 * waypoint0.time
-    A[10, 13] = 1
-    A[10, 14] = 0
-    # end velocity constraints
-    A[11, 0] = 4 * waypoint1.time ** 3
-    A[11, 1] = 3 * waypoint1.time ** 2
-    A[11, 2] = 2 * waypoint1.time
-    A[11, 3] = 1
-    A[11, 4] = 0
-    A[12, 5] = 4 * waypoint1.time ** 3
-    A[12, 6] = 3 * waypoint1.time ** 2
-    A[12, 7] = 2 * waypoint1.time
-    A[12, 8] = 1
-    A[12, 9] = 0
-    A[13, 10] = 4 * waypoint1.time ** 3
-    A[13, 11] = 3 * waypoint1.time ** 2
-    A[13, 12] = 2 * waypoint1.time
-    A[13, 13] = 1
-    A[13, 14] = 0
-
-    A = csc_matrix(A)  # convert to CSC for performance
+    A = zeros((numConstraints, numCoefficients))
 
     # =============================
     # Equality vector (right side)
     # =============================
-    b = zeros((14, 1))
-    # start position and yaw constraints
-    b[0, 0] = waypoint0.x
-    b[1, 0] = waypoint0.y
-    b[2, 0] = waypoint0.z
-    b[3, 0] = waypoint0.phi
-    # end position and yaw constraints
-    b[4, 0] = waypoint1.x
-    b[5, 0] = waypoint1.y
-    b[6, 0] = waypoint1.z
-    b[7, 0] = waypoint1.phi
-    # start velocity constraints
-    b[8, 0] = waypoint0.x_dot
-    b[9, 0] = waypoint0.y_dot
-    b[10, 0] = waypoint0.z_dot
-    # end velocity constraints
-    b[11, 0] = waypoint1.x_dot
-    b[12, 0] = waypoint1.y_dot
-    b[13, 0] = waypoint1.z_dot
-    b = hstack(b)  # convert to hstack for performance
+    b = zeros((numConstraints, 1))
 
-    trajectory = solve_qp(P, q, G, h, A, b, solver="osqp")  # solver = "quadprog" (default), "cvxpy", "osqp"
-    print("QP solution:", trajectory)
-    draw.draw_traj(waypoint0, waypoint1, trajectory)
-    return waypoint0, waypoint1, trajectory
+    # =============================
+    # Set up of Equality Constraints
+    # =============================
+    cc = -1  # Current Constraint
+    for i in range(numSegments):
+        # "start of segment" position constraints
+        cc += 1  # X Position
+        A[cc, 0 + i * 18] = waypoints[i].time ** 4
+        A[cc, 1 + i * 18] = waypoints[i].time ** 3
+        A[cc, 2 + i * 18] = waypoints[i].time ** 2
+        A[cc, 3 + i * 18] = waypoints[i].time
+        A[cc, 4 + i * 18] = 1
+        b[cc, 0] = waypoints[i].x
+        cc += 1  # Y Position
+        A[cc, 5 + i * 18] = waypoints[i].time ** 4
+        A[cc, 6 + i * 18] = waypoints[i].time ** 3
+        A[cc, 7 + i * 18] = waypoints[i].time ** 2
+        A[cc, 8 + i * 18] = waypoints[i].time
+        A[cc, 9 + i * 18] = 1
+        b[cc, 0] = waypoints[i].y
+        cc += 1  # Z Position
+        A[cc, 10 + i * 18] = waypoints[i].time ** 4
+        A[cc, 11 + i * 18] = waypoints[i].time ** 3
+        A[cc, 12 + i * 18] = waypoints[i].time ** 2
+        A[cc, 13 + i * 18] = waypoints[i].time
+        A[cc, 14 + i * 18] = 1
+        b[cc, 0] = waypoints[i].z
+        cc += 1  # Phi Angle
+        A[cc, 15 + i * 18] = waypoints[i].time ** 2
+        A[cc, 16 + i * 18] = waypoints[i].time
+        A[cc, 17 + i * 18] = 1
+        b[cc, 0] = waypoints[i].phi
+
+        # "end of segment" position constraints
+        cc += 1  # X Position
+        A[cc, 0 + i * 18] = waypoints[i + 1].time ** 4
+        A[cc, 1 + i * 18] = waypoints[i + 1].time ** 3
+        A[cc, 2 + i * 18] = waypoints[i + 1].time ** 2
+        A[cc, 3 + i * 18] = waypoints[i + 1].time
+        A[cc, 4 + i * 18] = 1
+        b[cc, 0] = waypoints[i + 1].x
+        cc += 1  # Y Position
+        A[cc, 5 + i * 18] = waypoints[i + 1].time ** 4
+        A[cc, 6 + i * 18] = waypoints[i + 1].time ** 3
+        A[cc, 7 + i * 18] = waypoints[i + 1].time ** 2
+        A[cc, 8 + i * 18] = waypoints[i + 1].time
+        A[cc, 9 + i * 18] = 1
+        b[cc, 0] = waypoints[i + 1].y
+        cc += 1  # Z Position
+        A[cc, 10 + i * 18] = waypoints[i + 1].time ** 4
+        A[cc, 11 + i * 18] = waypoints[i + 1].time ** 3
+        A[cc, 12 + i * 18] = waypoints[i + 1].time ** 2
+        A[cc, 13 + i * 18] = waypoints[i + 1].time
+        A[cc, 14 + i * 18] = 1
+        b[cc, 0] = waypoints[i + 1].z
+        cc += 1  # Phi Angle
+        A[cc, 15 + i * 18] = waypoints[i + 1].time ** 2
+        A[cc, 16 + i * 18] = waypoints[i + 1].time
+        A[cc, 17 + i * 18] = 1
+        b[cc, 0] = waypoints[i + 1].phi
+
+        # segment rendezvous constraints
+        if i == 0:
+            continue
+
+        cc += 1  # X Velocity Rendezvous
+        A[cc, 0 + i * 18] = 4 * waypoints[i].time ** 3
+        A[cc, 1 + i * 18] = 3 * waypoints[i].time ** 2
+        A[cc, 2 + i * 18] = 2 * waypoints[i].time
+        A[cc, 3 + i * 18] = 1
+        A[cc, 0 + i * 18 - 18] = -1 * A[cc, 0 + i * 18]
+        A[cc, 1 + i * 18 - 18] = -1 * A[cc, 1 + i * 18]
+        A[cc, 2 + i * 18 - 18] = -1 * A[cc, 2 + i * 18]
+        A[cc, 3 + i * 18 - 18] = -1 * A[cc, 3 + i * 18]
+        cc += 1  # Y Velocity Rendezvous
+        A[cc, 5 + i * 18] = 4 * waypoints[i].time ** 3
+        A[cc, 6 + i * 18] = 3 * waypoints[i].time ** 2
+        A[cc, 7 + i * 18] = 2 * waypoints[i].time
+        A[cc, 8 + i * 18] = 1
+        A[cc, 5 + i * 18 - 18] = -1 * A[cc, 5 + i * 18]
+        A[cc, 6 + i * 18 - 18] = -1 * A[cc, 6 + i * 18]
+        A[cc, 7 + i * 18 - 18] = -1 * A[cc, 7 + i * 18]
+        A[cc, 8 + i * 18 - 18] = -1 * A[cc, 8 + i * 18]
+        cc += 1  # Z Velocity Rendezvous
+        A[cc, 10 + i * 18] = 4 * waypoints[i].time ** 3
+        A[cc, 11 + i * 18] = 3 * waypoints[i].time ** 2
+        A[cc, 12 + i * 18] = 2 * waypoints[i].time
+        A[cc, 13 + i * 18] = 1
+        A[cc, 10 + i * 18 - 18] = -1 * A[cc, 10 + i * 18]
+        A[cc, 11 + i * 18 - 18] = -1 * A[cc, 11 + i * 18]
+        A[cc, 12 + i * 18 - 18] = -1 * A[cc, 12 + i * 18]
+        A[cc, 13 + i * 18 - 18] = -1 * A[cc, 13 + i * 18]
+        # cc += 1  # Phi Velocity Rendezvous
+        A[cc, 15 + i * 18] = 2 * waypoints[i].time
+        A[cc, 16 + i * 18] = 1
+        A[cc, 15 + i * 18 - 18] = -1 * A[cc, 15 + i * 18]
+        A[cc, 16 + i * 18 - 18] = -1 * A[cc, 16 + i * 18]
+
+        # cc += 1  # X Acceleration Rendezvous
+        # A[cc, 0 + i * 18] = 12 * waypoints[0].time ** 2
+        # A[cc, 1 + i * 18] = 6 * waypoints[0].time
+        # A[cc, 2 + i * 18] = 2
+        # A[cc, 0 + i * 18 - 18] = -1 * A[cc, 0 + i * 18]
+        # A[cc, 1 + i * 18 - 18] = -1 * A[cc, 1 + i * 18]
+        # A[cc, 2 + i * 18 - 18] = -1 * A[cc, 2 + i * 18]
+        # cc += 1  # Y Acceleration Rendezvous
+        # A[cc, 5 + i * 18] = 12 * waypoints[0].time ** 2
+        # A[cc, 6 + i * 18] = 6 * waypoints[0].time
+        # A[cc, 7 + i * 18] = 2
+        # A[cc, 5 + i * 18 - 18] = -1 * A[cc, 5 + i * 18]
+        # A[cc, 6 + i * 18 - 18] = -1 * A[cc, 6 + i * 18]
+        # A[cc, 7 + i * 18 - 18] = -1 * A[cc, 7 + i * 18]
+        # cc += 1  # Z Acceleration Rendezvous
+        # A[cc, 10 + i * 18] = 12 * waypoints[0].time ** 2
+        # A[cc, 11 + i * 18] = 6 * waypoints[0].time
+        # A[cc, 12 + i * 18] = 2
+        # A[cc, 10 + i * 18 - 18] = -1 * A[cc, 10 + i * 18]
+        # A[cc, 11 + i * 18 - 18] = -1 * A[cc, 11 + i * 18]
+        # A[cc, 12 + i * 18 - 18] = -1 * A[cc, 12 + i * 18]
+        # cc += 1  # Phi Acceleration Rendezvous
+        # A[cc, 15 + i * 18] = 2
+        # A[cc, 15 + i * 18 - 18] = -1 * A[cc, 15 + i * 18]
+
+        # cc += 1  # X Jerk Rendezvous
+        # A[cc, 0] = 24 * waypoints[0].time
+        # A[cc, 1] = 6
+        # A[cc, 0 + i * 18 - 18] = -1 * A[cc, 0 + i * 18]
+        # A[cc, 1 + i * 18 - 18] = -1 * A[cc, 1 + i * 18]
+        # cc += 1  # Y Jerk Rendezvous
+        # A[cc, 5] = 24 * waypoints[0].time
+        # A[cc, 6] = 6
+        # A[cc, 5 + i * 18 - 18] = -1 * A[cc, 5 + i * 18]
+        # A[cc, 6 + i * 18 - 18] = -1 * A[cc, 6 + i * 18]
+        # cc += 1  # Z Jerk Rendezvous
+        # A[cc, 10] = 24 * waypoints[0].time
+        # A[cc, 11] = 6
+        # A[cc, 10 + i * 18 - 18] = -1 * A[cc, 10 + i * 18]
+        # A[cc, 11 + i * 18 - 18] = -1 * A[cc, 11 + i * 18]
+        #
+        # cc += 1  # X Snap Rendezvous
+        # A[cc, 0] = 24
+        # A[cc, 0 + i * 18 - 18] = -1 * A[cc, 0 + i * 18]
+        # cc += 1  # Y Snap Rendezvous
+        # A[cc, 5] = 24
+        # A[cc, 5 + i * 18 - 18] = -1 * A[cc, 5 + i * 18]
+        # cc += 1  # Z Snap Rendezvous
+        # A[cc, 10] = 24
+        # A[cc, 10 + i * 18 - 18] = -1 * A[cc, 10 + i * 18]
+
+    cc += 1
+    # start velocity constraints
+    A[cc, 0] = 4 * waypoints[0].time ** 3
+    A[cc, 1] = 3 * waypoints[0].time ** 2
+    A[cc, 2] = 2 * waypoints[0].time
+    A[cc, 3] = 1
+    A[cc + 1, 5] = 4 * waypoints[0].time ** 3
+    A[cc + 1, 6] = 3 * waypoints[0].time ** 2
+    A[cc + 1, 7] = 2 * waypoints[0].time
+    A[cc + 1, 8] = 1
+    A[cc + 2, 10] = 4 * waypoints[0].time ** 3
+    A[cc + 2, 11] = 3 * waypoints[0].time ** 2
+    A[cc + 2, 12] = 2 * waypoints[0].time
+    A[cc + 2, 13] = 1
+    A[cc + 3, 15] = 2 * waypoints[0].time
+    A[cc + 3, 16] = 1
+
+    # end velocity constraints
+    A[cc + 4, numCoefficients - 18 + 0] = 4 * waypoints[-1].time ** 3
+    A[cc + 4, numCoefficients - 18 + 1] = 3 * waypoints[-1].time ** 2
+    A[cc + 4, numCoefficients - 18 + 2] = 2 * waypoints[-1].time
+    A[cc + 4, numCoefficients - 18 + 3] = 1
+    A[cc + 5, numCoefficients - 18 + 5] = 4 * waypoints[-1].time ** 3
+    A[cc + 5, numCoefficients - 18 + 6] = 3 * waypoints[-1].time ** 2
+    A[cc + 5, numCoefficients - 18 + 7] = 2 * waypoints[-1].time
+    A[cc + 5, numCoefficients - 18 + 8] = 1
+    A[cc + 6, numCoefficients - 18 + 10] = 4 * waypoints[-1].time ** 3
+    A[cc + 6, numCoefficients - 18 + 11] = 3 * waypoints[-1].time ** 2
+    A[cc + 6, numCoefficients - 18 + 12] = 2 * waypoints[-1].time
+    A[cc + 6, numCoefficients - 18 + 13] = 1
+    A[cc + 7, numCoefficients - 18 + 15] = 2 * waypoints[-1].time
+    A[cc + 7, numCoefficients - 18 + 16] = 1
+
+    # start acceleration constraints
+    # A[cc + 8, 0] = 12 * waypoints[0].time ** 2
+    # A[cc + 8, 1] = 6 * waypoints[0].time
+    # A[cc + 8, 2] = 2
+    # A[cc + 9, 5] = 12 * waypoints[0].time ** 2
+    # A[cc + 9, 6] = 6 * waypoints[0].time
+    # A[cc + 9, 7] = 2
+    # A[cc + 10, 10] = 12 * waypoints[0].time ** 2
+    # A[cc + 10, 11] = 6 * waypoints[0].time
+    # A[cc + 10, 12] = 2
+    # A[cc + 11, 15] = 2
+
+    # end acceleration constraints
+    # A[cc + 12, numCoefficients - 18 + 0] = 12 * waypoints[-1].time ** 2
+    # A[cc + 12, numCoefficients - 18 + 1] = 6 * waypoints[-1].time
+    # A[cc + 12, numCoefficients - 18 + 2] = 2
+    # A[cc + 13, numCoefficients - 18 + 5] = 12 * waypoints[-1].time ** 2
+    # A[cc + 13, numCoefficients - 18 + 6] = 6 * waypoints[-1].time
+    # A[cc + 13, numCoefficients - 18 + 7] = 2
+    # A[cc + 14, numCoefficients - 18 + 10] = 12 * waypoints[-1].time ** 2
+    # A[cc + 14, numCoefficients - 18 + 11] = 6 * waypoints[-1].time
+    # A[cc + 14, numCoefficients - 18 + 12] = 2
+    # A[cc + 15, numCoefficients - 18 + 15] = 2
+
+    # start jerk constraints
+    # A[cc + 16, 0] = 24 * waypoints[0].time
+    # A[cc + 16, 1] = 6
+    # A[cc + 17, 5] = 24 * waypoints[0].time
+    # A[cc + 17, 6] = 6
+    # A[cc + 18, 10] = 24 * waypoints[0].time
+    # A[cc + 18, 11] = 6
+
+    # end jerk constraints
+    # A[cc + 19, numCoefficients - 18 + 0] = 24 * waypoints[-1].time
+    # A[cc + 19, numCoefficients - 18 + 1] = 6
+    # A[cc + 20, numCoefficients - 18 + 5] = 24 * waypoints[-1].time
+    # A[cc + 20, numCoefficients - 18 + 6] = 6
+    # A[cc + 21, numCoefficients - 18 + 10] = 24 * waypoints[-1].time
+    # A[cc + 21, numCoefficients - 18 + 11] = 6
+
+    # start snap constraints
+    # A[cc + 22, 0] = 24
+    # A[cc + 23, 5] = 24
+    # A[cc + 24, 10] = 24
+
+    # end snap constraints
+    # A[cc + 25, numCoefficients - 18 + 0] = 24
+    # A[cc + 26, numCoefficients - 18 + 5] = 24
+    # A[cc + 27, numCoefficients - 18 + 10] = 24
+
+    # =============================
+    # Solver Setup
+    # =============================
+    # OSQP needs:
+    # P = quadratic terms
+    # q = linear terms
+    # A = constraint matrix of ALL constraints (inequality & equality)
+    # l = lower constraints
+    # u = upper constraints
+    P = csc_matrix(P)
+    q = hstack(q)
+    h = hstack(h)
+    b = hstack(b)
+
+    A = vstack([G, A])
+    A = csc_matrix(A)
+    l = -inf * ones(len(h))
+    l = hstack([l, b])
+    u = hstack([h, b])
+
+    # setup solver and solve
+    m = osqp.OSQP()
+    m.setup(P=P, q=q, A=A, l=l, u=u)  # extra solver variables can be set here
+    res = m.solve()
+
+    # save to trajectory variable
+    for i in range(0, size(res.x), 18):
+        segment = res.x[i:i + 18]
+        trajectory.append(segment)
+    print("QP solution Number following: ", res.x)
+    return trajectory
+
+
+
+
+def separate(waypoints):
+    # every segment has its own polynomial of 4th degree for X,Y and Z and a polynomial of 2nd degree for Phi
+    numCoefficients = 3*5+3
+    # total number of segments
+    numSegments = len(waypoints) - 1
+    # list of calculated trajectory coefficients
+    trajectory = []
+
+
+    for i in range(numSegments):
+        # 2*(3+1) Positional + (4*3)+(2*1) Start Constraints
+        numConstraints = 16
+        # (4*3)+(2*1) Extra Constraints only for absolute End
+        # they are initialized as zero, so no changes needed
+        if i == numSegments-1:
+            numConstraints += 3
+
+        # =============================
+        # Identity matrix for main part of QP (normally the Hesse matrix (quadratic terms), but this is a least squared problem)
+        # =============================
+        P = zeros((numCoefficients, numCoefficients))
+        P[0, 0] = 1  # minimize snap for X
+        P[5, 5] = 1  # minimize snap for Y
+        P[10, 10] = 1  # minimize snap for Z
+        P[15, 15] = 1  # minimize acceleration for Phi
+
+        # =============================
+        # Gradient vector (linear terms), we have none
+        # =============================
+        q = zeros((numCoefficients, 1))
+
+        # =============================
+        # Inequality matrix (left side), we have none
+        # =============================
+        G = zeros((numConstraints, numCoefficients))
+
+        # =============================
+        # Inequality vector (right side), we have none
+        # =============================
+        h = zeros((numConstraints, 1))
+
+        # =============================
+        # Equality matrix (left side)
+        # =============================
+        A = zeros((numConstraints, numCoefficients))
+        # X Position Start
+        A[0,0] = waypoints[i].time ** 4
+        A[0,1] = waypoints[i].time ** 3
+        A[0,2] = waypoints[i].time ** 2
+        A[0,3] = waypoints[i].time
+        A[0,4] = 1
+        # Y Position Start
+        A[1, 5] = waypoints[i].time ** 4
+        A[1, 6] = waypoints[i].time ** 3
+        A[1, 7] = waypoints[i].time ** 2
+        A[1, 8] = waypoints[i].time
+        A[1, 9] = 1
+        # Z Position Start
+        A[2, 10] = waypoints[i].time ** 4
+        A[2, 11] = waypoints[i].time ** 3
+        A[2, 12] = waypoints[i].time ** 2
+        A[2, 13] = waypoints[i].time
+        A[2, 14] = 1
+        # Phi Angle Start
+        A[3, 15] = waypoints[i].time ** 2
+        A[3, 16] = waypoints[i].time
+        A[3, 17] = 1
+
+        # X Position End
+        A[4, 0] = waypoints[i + 1].time ** 4
+        A[4, 1] = waypoints[i + 1].time ** 3
+        A[4, 2] = waypoints[i + 1].time ** 2
+        A[4, 3] = waypoints[i + 1].time
+        A[4, 4] = 1
+        # Y Position End
+        A[5, 5] = waypoints[i + 1].time ** 4
+        A[5, 6] = waypoints[i + 1].time ** 3
+        A[5, 7] = waypoints[i + 1].time ** 2
+        A[5, 8] = waypoints[i + 1].time
+        A[5, 9] = 1
+        # Z Position End
+        A[6, 10] = waypoints[i + 1].time ** 4
+        A[6, 11] = waypoints[i + 1].time ** 3
+        A[6, 12] = waypoints[i + 1].time ** 2
+        A[6, 13] = waypoints[i + 1].time
+        A[6, 14] = 1
+        # Phi Angle End
+        A[7, 15] = waypoints[i + 1].time ** 2
+        A[7, 16] = waypoints[i + 1].time
+        A[7, 17] = 1
+
+        # X Velocity Rendezvous
+        A[8, 0] = 4 * waypoints[i].time ** 3
+        A[8, 1] = 3 * waypoints[i].time ** 2
+        A[8, 2] = 2 * waypoints[i].time
+        A[8, 3] = 1
+        # Y Velocity Rendezvous
+        A[9, 5] = 4 * waypoints[i].time ** 3
+        A[9, 6] = 3 * waypoints[i].time ** 2
+        A[9, 7] = 2 * waypoints[i].time
+        A[9, 8] = 1
+        # Z Velocity Rendezvous
+        A[10, 10] = 4 * waypoints[i].time ** 3
+        A[10, 11] = 3 * waypoints[i].time ** 2
+        A[10, 12] = 2 * waypoints[i].time
+        A[10, 13] = 1
+        # Phi Velocity Rendezvous
+        A[11, 15] = 2 * waypoints[i].time
+        A[11, 16] = 1
+
+        # X Acceleration Rendezvous
+        A[12, 0] = 12 * waypoints[i].time ** 2
+        A[12, 1] = 6 * waypoints[i].time
+        A[12, 2] = 2
+        # Y Acceleration Rendezvous
+        A[13, 5] = 12 * waypoints[i].time ** 2
+        A[13, 6] = 6 * waypoints[i].time
+        A[13, 7] = 2
+        # Z Acceleration Rendezvous
+        A[14, 10] = 12 * waypoints[i].time ** 2
+        A[14, 11] = 6 * waypoints[i].time
+        A[14, 12] = 2
+        # Phi Acceleration Rendezvous
+        #A[15, 15] = 2
+
+        # X Jerk Rendezvous
+        #A[16, 0] = 24 * waypoints[i].time
+        #A[16, 1] = 6
+        # Y Jerk Rendezvous
+        #A[17, 5] = 24 * waypoints[i].time
+        #A[17, 6] = 6
+        # Z Jerk Rendezvous
+        #A[18, 10] = 24 * waypoints[i].time
+        #A[18, 11] = 6
+
+        # X Snap Rendezvous
+        #A[19, 0] = 24
+        # Y Snap Rendezvous
+        #A[20, 5] = 24
+        # Z Snap Rendezvous
+        #A[21, 10] = 24
+
+        # for full stop at absolute End
+        if i == numSegments - 1:
+            # X Velocity Rendezvous
+            A[15, 0] = 4 * waypoints[i + 1].time ** 3
+            A[15, 1] = 3 * waypoints[i + 1].time ** 2
+            A[15, 2] = 2 * waypoints[i + 1].time
+            A[15, 3] = 1
+            # Y Velocity Rendezvous
+            A[16, 5] = 4 * waypoints[i + 1].time ** 3
+            A[16, 6] = 3 * waypoints[i + 1].time ** 2
+            A[16, 7] = 2 * waypoints[i + 1].time
+            A[16, 8] = 1
+            # Z Velocity Rendezvous
+            A[17, 10] = 4 * waypoints[i + 1].time ** 3
+            A[17, 11] = 3 * waypoints[i + 1].time ** 2
+            A[17, 12] = 2 * waypoints[i + 1].time
+            A[17, 13] = 1
+
+        # =============================
+        # Equality vector (right side)
+        # =============================
+        b = zeros((numConstraints, 1))
+
+        b[0, 0] = waypoints[i].x
+        b[1, 0] = waypoints[i].y
+        b[2, 0] = waypoints[i].z
+        b[3, 0] = waypoints[i].phi
+        b[4, 0] = waypoints[i+1].x
+        b[5, 0] = waypoints[i+1].y
+        b[6, 0] = waypoints[i+1].z
+        b[7, 0] = waypoints[i+1].phi
+
+        # Derivatives = 0 for absolute Start, else Rendezvous of Segments
+        if i != 0:
+            b[8, 0] = 4 * trajectory[-1][0] * waypoints[i].time ** 3 + 3 * trajectory[-1][1] * waypoints[i].time ** 2 + 2 * trajectory[-1][2] * waypoints[i].time + trajectory[-1][3]
+            b[9, 0] = 4 * trajectory[-1][5] * waypoints[i].time ** 3 + 3 * trajectory[-1][6] * waypoints[i].time ** 2 + 2* trajectory[-1][7] * waypoints[i].time + trajectory[-1][8]
+            b[10, 0] = 4 * trajectory[-1][10] * waypoints[i].time ** 3 + 3 * trajectory[-1][11] * waypoints[i].time ** 2 + 2 * trajectory[-1][12] * waypoints[i].time + trajectory[-1][13]
+            b[11, 0] = 2 * trajectory[-1][15] * waypoints[i].time + trajectory[-1][16]
+
+            b[12, 0] = 12 * trajectory[-1][0] * waypoints[i].time ** 2 + 6 * trajectory[-1][1] * waypoints[i].time + 2 * trajectory[-1][2]
+            b[13, 0] = 12 * trajectory[-1][5] * waypoints[i].time ** 2 + 6 * trajectory[-1][6] * waypoints[i].time + 2 * trajectory[-1][7]
+            b[14, 0] = 12 * trajectory[-1][10] * waypoints[i].time ** 2 + 6 * trajectory[-1][11] * waypoints[i].time + 2 * trajectory[-1][12]
+
+
+        # =============================
+        # Solver Setup
+        # =============================
+        # OSQP needs:
+        # P = quadratic terms
+        # q = linear terms
+        # A = constraint matrix of ALL constraints (inequality & equality)
+        # l = lower constraints
+        # u = upper constraints
+        P = csc_matrix(P)
+        q = hstack(q)
+        h = hstack(h)
+        b = hstack(b)
+
+        A = vstack([G, A])
+        A = csc_matrix(A)
+        l = -inf * ones(len(h))
+        l = hstack([l, b])
+        u = hstack([h, b])
+
+        # setup solver and solve
+        m = osqp.OSQP()
+        m.setup(P=P, q=q, A=A, l=l, u=u) # extra solver variables can be set here
+        res = m.solve()
+
+        # save to trajectory variable
+        trajectory.append(res.x)
+        print("QP solution Number ", i, "following: ", res.x)
+
+    return trajectory
+
+
+
+
+def planner(waypoint_arr, isJoint):
+    waypoints = []
+
+    # the given "waypoints" are just the x,y,z,phi values -> convert them to actual Waypoints
+    for i in range(size(waypoint_arr)):
+        # calculate time of waypoint
+        if i == 0:
+            time = 0
+        else:
+            time += calc_time(waypoint_arr[i-1],waypoint_arr[i])
+        # create and append waypoint
+        waypoint = Waypoint(waypoint_arr[i][1], waypoint_arr[i][2], waypoint_arr[i][3], waypoint_arr[i][4], time)
+        waypoints.append(waypoint)
+
+    # test waypoints
+    # waypoints.append(Waypoint(0, 0, 2, 0, 0))
+    # waypoints.append(Waypoint(5, 0, 4, 3, 6))
+    # waypoints.append(Waypoint(5, 5, 3, 1, 15))
+    # waypoints.append(Waypoint(0, 5, 1, 5, 20))
+    # waypoints.append(Waypoint(-5, 0, 2, 4, 23))
+
+
+    if isJoint:
+        trajectory = joint(waypoints)
+    else:
+        trajectory = separate(waypoints)
+
+    # show generated trajectory in new window
+    draw.draw_traj(waypoints, trajectory)
+
+    # after closing trajectory visualization
+    return waypoints,trajectory
