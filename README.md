@@ -10,7 +10,8 @@ and
 [2] D. Mellinger and V. Kumar, "**Minimum snap trajectory generation and control for quadrotors,**" 2011 IEEE International Conference on Robotics and Automation, Shanghai, 2011, pp. 2520-2525.
 
 ## Examplary Overview
-![Example Picture](example.png)
+![Example Picture 1](example.jpg)
+![Example Picture 2](example2.jpg)
 
 ## Work in Progress!
 This currently still is a work in progress! Please take a look at the issue page to see what likely will be implemented in the next few days to weeks.
