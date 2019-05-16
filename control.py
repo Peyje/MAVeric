@@ -11,7 +11,7 @@ class dim3Error:
         self.z = sz - tz
 
 
-# a control objects saves the trajectory to follow and calculates the next step of corresponding rotor speeds
+# a control object saves the trajectory to follow and calculates the next step of corresponding rotor speeds
 class Control:
     def __init__(self, waypoints, trajectory):
         # mass

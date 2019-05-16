@@ -559,7 +559,7 @@ def planner(waypoint_arr, isJoint):
         else:
             time += calc_time(waypoint_arr[i-1],waypoint_arr[i])
         # create and append waypoint
-        waypoint = Waypoint(waypoint_arr[i][0], waypoint_arr[i][1], waypoint_arr[i][2], waypoint_arr[i][3], time)
+        waypoint = Waypoint(waypoint_arr[i][1], waypoint_arr[i][2], waypoint_arr[i][3], waypoint_arr[i][4], time)
         waypoints.append(waypoint)
 
     # test waypoints
