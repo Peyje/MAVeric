@@ -2,6 +2,7 @@ from numpy import *
 from scipy.sparse import csc_matrix
 import draw
 import osqp
+import math
 
 class Waypoint:
     def __init__(self, x, y, z, phi, time):
@@ -12,8 +13,10 @@ class Waypoint:
 
         self.time = time
 
+# calculates a fitting time for the trajectory by linking it to the 3d distance
 def calc_time(start, end):
-    time = 5 # TODO: Actually calculate time
+    distance3D = sqrt((start[1]-end[1])**2 + (start[2]-end[2])**2 + (start[3]-end[3])**2)
+    time = distance3D  # ..where an engineer cries and a programmer sees an easy solution
     return time
 
 def joint(waypoints):
@@ -572,7 +575,16 @@ def separate(waypoints):
 
 
 def planner(waypoint_arr, isJoint):
+    # test waypoints
+    #waypoint_arr = []
+    #waypoint_arr.append([0, 0, 0, 2, 0])
+    #waypoint_arr.append([1, 5, 0, 4, 3])
+    #waypoint_arr.append([2, 5, 5, 3, 1])
+    #waypoint_arr.append([3, 0, 5, 1, 5])
+    #waypoint_arr.append([4, -5, 0, 2, 4])
+
     waypoints = []
+
 
     # the given "waypoints" are just the x,y,z,phi values -> convert them to actual Waypoints
     for i in range(size(waypoint_arr)):
@@ -580,18 +592,10 @@ def planner(waypoint_arr, isJoint):
         if i == 0:
             time = 0
         else:
-            time += calc_time(waypoint_arr[i-1],waypoint_arr[i])
+            time += calc_time(waypoint_arr[i-1], waypoint_arr[i])
         # create and append waypoint
         waypoint = Waypoint(waypoint_arr[i][1], waypoint_arr[i][2], waypoint_arr[i][3], waypoint_arr[i][4], time)
         waypoints.append(waypoint)
-
-    # test waypoints
-    #waypoints = []
-    #waypoints.append(Waypoint(0, 0, 2, 0, 0))
-    #waypoints.append(Waypoint(5, 0, 4, 3, 6))
-    #waypoints.append(Waypoint(5, 5, 3, 1, 15))
-    #waypoints.append(Waypoint(0, 5, 1, 5, 20))
-    #waypoints.append(Waypoint(-5, 0, 2, 4, 23))
 
 
     if isJoint:
