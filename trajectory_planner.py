@@ -34,8 +34,11 @@ def joint(waypoints):
     P_numpy = zeros((numCoefficients, numCoefficients))
     for i in range(numSegments):
         P_numpy[0 + i * 18, 0 + i * 18] = 1  # minimize snap for X
+        # P_numpy[2 + i * 18, 2 + i * 18] = 100  # minimize acceleration for X
         P_numpy[5 + i * 18, 5 + i * 18] = 1  # minimize snap for Y
+        # P_numpy[7 + i * 18, 7 + i * 18] = 100  # minimize acceleration for Y
         P_numpy[10 + i * 18, 10 + i * 18] = 1  # minimize snap for Z
+        # P_numpy[12 + i * 18, 12 + i * 18] = 100  # minimize acceleration for Z
         P_numpy[15 + i * 18, 15 + i * 18] = 1  # minimize acceleration for Phi
     P = csc_matrix(P_numpy)  # convert to CSC for performance
 
