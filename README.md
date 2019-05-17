@@ -11,7 +11,7 @@ and
 
 ## Examplary Overview
 ![Example Picture 1](example.jpg)
-![Example Picture 2](example2.jpg)
+![Example Picture 2](exampleVisual.png)
 
 ## Work in Progress!
 This currently still is a work in progress! Please take a look at the issue page to see what likely will be implemented in the next few days to weeks.
