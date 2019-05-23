@@ -3,7 +3,7 @@ from simulation.builder.actuators import Dyncallable, Waypointswitchable
 
 # creates a new instance of the robot
 mav = Quadrotor()
-mav.set_mass(0.028)  # real mass of Craziefly drone is too light for simulation
+#mav.set_mass(0.028)  # set mass of drone BUT change gains of PD to fitting values as well!
 
 # place mav at an initial location
 mav.translate(0.0, 0.0, 2)
@@ -24,12 +24,12 @@ mav.append(dyn_callable)
 # create another actuator for setting waypoints
 waypoint_actuator = Waypointswitchable()
 # set gains for PD controller as default does not work with low mass
-waypoint_actuator.properties(HorizontalPgain=0.1,  # default: 0.10471975511965978
-                             HorizontalDgain=0.13,  # default: 0.13962634015954636
-                             VerticalPgain=1,  # default: 8.0
-                             VerticalDgain=1,  # default: 8.0
-                             YawPgain=0.05,  # default: 12.0
-                             YawDgain=0.05,  # default: 6.0
+waypoint_actuator.properties(HorizontalPgain=0.10471975511965978,  # default: 0.10471975511965978
+                             HorizontalDgain=0.13962634015954636,  # default: 0.13962634015954636
+                             VerticalPgain=8.0,  # default: 8.0
+                             VerticalDgain=8.0,  # default: 8.0
+                             YawPgain=12.0,  # default: 12.0
+                             YawDgain=6.0,  # default: 6.0
                              RollPitchPgain=9.7,  # default: 9.7
                              RollPitchDgain=2.0)  # default: 2.0
 mav.append(waypoint_actuator)
