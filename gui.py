@@ -132,7 +132,7 @@ class Bridge:
 		self.state_z_dot_label.set_text("%0.2f" % current_state.z_dot)
 
 		# update first waypoint for trajectory in GUI
-		waypoints_gui[0] = [0, current_state.x, current_state.y, current_state.z, current_state.phi]
+		waypoints_gui[0] = [0, current_state.x, current_state.y, current_state.z, current_state.psi]
 
 		return GLib.SOURCE_CONTINUE
 
@@ -208,13 +208,13 @@ class Handler:
 		self.goto_x_entry = builder.get_object("goto_x")
 		self.goto_y_entry = builder.get_object("goto_y")
 		self.goto_z_entry = builder.get_object("goto_z")
-		self.goto_phi_entry = builder.get_object("goto_phi")
+		self.goto_yaw_entry = builder.get_object("goto_yaw")
 
 		# get GUI objects for Trajectory
 		self.traj_to_x_entry = builder.get_object("traj_to_x")
 		self.traj_to_y_entry = builder.get_object("traj_to_y")
 		self.traj_to_z_entry = builder.get_object("traj_to_z")
-		self.traj_to_phi_entry = builder.get_object("traj_to_phi")
+		self.traj_to_yaw_entry = builder.get_object("traj_to_yaw")
 
 		# get Go button from Trajectory Planner to set sensitive after calculating
 		self.button_go_traj = builder.get_object("traj_go_button")
@@ -230,8 +230,8 @@ class Handler:
 		goto_x = self.goto_x_entry.get_text()
 		goto_y = self.goto_y_entry.get_text()
 		goto_z = self.goto_z_entry.get_text()
-		goto_phi = self.goto_phi_entry.get_text()
-		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_phi)
+		goto_yaw = self.goto_yaw_entry.get_text()
+		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_yaw)
 		comm.write(bytes(command_string, 'utf8'))
 
 	# if Add button is pressed, get values and add waypoint to list
@@ -239,16 +239,16 @@ class Handler:
 		wp_x = float(self.traj_to_x_entry.get_text())
 		wp_y = float(self.traj_to_y_entry.get_text())
 		wp_z = float(self.traj_to_z_entry.get_text())
-		wp_phi = float(self.traj_to_phi_entry.get_text())
+		wp_yaw = float(self.traj_to_yaw_entry.get_text())
 
 		# add waypoint to list
-		waypoints_gui.append([size(waypoints_gui), wp_x, wp_y, wp_z, wp_phi])
+		waypoints_gui.append([size(waypoints_gui), wp_x, wp_y, wp_z, wp_yaw])
 
 		# reset entry fields
 		self.traj_to_x_entry.set_text('')
 		self.traj_to_y_entry.set_text('')
 		self.traj_to_z_entry.set_text('')
-		self.traj_to_phi_entry.set_text('')
+		self.traj_to_yaw_entry.set_text('')
 
 	# if Calculate button is pressed, calculate and create a trajectory object
 	def onTrajCalcButtonPress(self, button):

@@ -12,7 +12,7 @@
       <column type="gfloat"/>
       <!-- column-name Z -->
       <column type="gfloat"/>
-      <!-- column-name Phi -->
+      <!-- column-name Yaw -->
       <column type="gfloat"/>
     </columns>
   </object>
@@ -235,7 +235,8 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">x_dot</property>
+                        <property name="margin_top">3</property>
+                        <property name="label" translatable="yes">Ẋ</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
@@ -249,7 +250,8 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">y_dot</property>
+                        <property name="margin_top">3</property>
+                        <property name="label" translatable="yes">Ẏ</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
@@ -263,7 +265,8 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">z_dot</property>
+                        <property name="margin_top">3</property>
+                        <property name="label" translatable="yes">Ż</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
@@ -544,7 +547,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="goto_phi">
+                          <object class="GtkEntry" id="goto_yaw">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="placeholder_text" translatable="yes">0.00 in Radian</property>
@@ -705,7 +708,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="traj_to_phi">
+                          <object class="GtkEntry" id="traj_to_yaw">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="placeholder_text" translatable="yes">0.00 in Radian</property>
@@ -878,7 +881,7 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn">
-                                <property name="title" translatable="yes">Phi</property>
+                                <property name="title" translatable="yes">Yaw</property>
                                 <child>
                                   <object class="GtkCellRendererText"/>
                                   <attributes>

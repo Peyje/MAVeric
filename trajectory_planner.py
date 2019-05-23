@@ -5,11 +5,11 @@ import osqp
 import math
 
 class Waypoint:
-    def __init__(self, x, y, z, phi, time):
+    def __init__(self, x, y, z, yaw, time):
         self.x = x
         self.y = y
         self.z = z
-        self.phi = phi
+        self.yaw = yaw
 
         self.time = time
 
@@ -22,13 +22,13 @@ def calc_time(start, end):
 def joint(waypoints):
     # total number of segments
     numSegments = len(waypoints) - 1
-    # every segment has its own polynomial of 4th degree for X,Y and Z and a polynomial of 2nd degree for Phi
+    # every segment has its own polynomial of 4th degree for X,Y and Z and a polynomial of 2nd degree for Yaw
     numCoefficients = numSegments * (3*5+3)
     # list of calculated trajectory coefficients
     trajectory = []
-    # start + end X,Y,Z,Phi position for every segment: 8
-    # rendezvous X,Y,Z,Phi velocity: 4
-    # absolute start + end X,Y,Z (+ start Phi) velocity: 7
+    # start + end X,Y,Z,Yaw position for every segment: 8
+    # rendezvous X,Y,Z,Yaw velocity: 4
+    # absolute start + end X,Y,Z (+ start Yaw) velocity: 7
     numConstraints = numSegments * 8 + (numSegments - 1) * 4 + 7
 
     P_numpy = zeros((numCoefficients, numCoefficients))
@@ -39,7 +39,7 @@ def joint(waypoints):
         # P_numpy[7 + i * 18, 7 + i * 18] = 100  # minimize acceleration for Y
         P_numpy[10 + i * 18, 10 + i * 18] = 1  # minimize snap for Z
         # P_numpy[12 + i * 18, 12 + i * 18] = 100  # minimize acceleration for Z
-        P_numpy[15 + i * 18, 15 + i * 18] = 1  # minimize acceleration for Phi
+        P_numpy[15 + i * 18, 15 + i * 18] = 1  # minimize acceleration for Yaw
     P = csc_matrix(P_numpy)  # convert to CSC for performance
 
     # =============================
@@ -96,11 +96,11 @@ def joint(waypoints):
         A[cc, 13 + i * 18] = waypoints[i].time
         A[cc, 14 + i * 18] = 1
         b[cc, 0] = waypoints[i].z
-        cc += 1  # Phi Angle
+        cc += 1  # Yaw Angle
         A[cc, 15 + i * 18] = waypoints[i].time ** 2
         A[cc, 16 + i * 18] = waypoints[i].time
         A[cc, 17 + i * 18] = 1
-        b[cc, 0] = waypoints[i].phi
+        b[cc, 0] = waypoints[i].yaw
 
         # "end of segment" position constraints
         cc += 1  # X Position
@@ -124,11 +124,11 @@ def joint(waypoints):
         A[cc, 13 + i * 18] = waypoints[i + 1].time
         A[cc, 14 + i * 18] = 1
         b[cc, 0] = waypoints[i + 1].z
-        cc += 1  # Phi Angle
+        cc += 1  # Yaw Angle
         A[cc, 15 + i * 18] = waypoints[i + 1].time ** 2
         A[cc, 16 + i * 18] = waypoints[i + 1].time
         A[cc, 17 + i * 18] = 1
-        b[cc, 0] = waypoints[i + 1].phi
+        b[cc, 0] = waypoints[i + 1].yaw
 
         # segment rendezvous constraints
         if i == 0:
@@ -161,7 +161,7 @@ def joint(waypoints):
         A[cc, 11 + i * 18 - 18] = -1 * A[cc, 11 + i * 18]
         A[cc, 12 + i * 18 - 18] = -1 * A[cc, 12 + i * 18]
         A[cc, 13 + i * 18 - 18] = -1 * A[cc, 13 + i * 18]
-        cc += 1  # Phi Velocity Rendezvous
+        cc += 1  # Yaw Velocity Rendezvous
         A[cc, 15 + i * 18] = 2 * waypoints[i].time
         A[cc, 16 + i * 18] = 1
         A[cc, 15 + i * 18 - 18] = -1 * A[cc, 15 + i * 18]
@@ -188,7 +188,7 @@ def joint(waypoints):
         # A[cc, 10 + i * 18 - 18] = -1 * A[cc, 10 + i * 18]
         # A[cc, 11 + i * 18 - 18] = -1 * A[cc, 11 + i * 18]
         # A[cc, 12 + i * 18 - 18] = -1 * A[cc, 12 + i * 18]
-        # cc += 1  # Phi Acceleration Rendezvous
+        # cc += 1  # Yaw Acceleration Rendezvous
         # A[cc, 15 + i * 18] = 2
         # A[cc, 15 + i * 18 - 18] = -1 * A[cc, 15 + i * 18]
 
@@ -233,7 +233,7 @@ def joint(waypoints):
     A[cc, 11] = 3 * waypoints[0].time ** 2
     A[cc, 12] = 2 * waypoints[0].time
     A[cc, 13] = 1
-    cc += 1  # absolute start Phi velocity
+    cc += 1  # absolute start Yaw velocity
     A[cc, 15] = 2 * waypoints[0].time
     A[cc, 16] = 1
 
@@ -252,7 +252,7 @@ def joint(waypoints):
     A[cc, numCoefficients - 18 + 11] = 3 * waypoints[-1].time ** 2
     A[cc, numCoefficients - 18 + 12] = 2 * waypoints[-1].time
     A[cc, numCoefficients - 18 + 13] = 1
-    #cc += 1  # absolute end Phi velocity
+    #cc += 1  # absolute end Yaw velocity
     #A[cc, numCoefficients - 18 + 15] = 2 * waypoints[-1].time
     #A[cc, numCoefficients - 18 + 16] = 1
 
@@ -268,7 +268,7 @@ def joint(waypoints):
     # A[cc, 10] = 12 * waypoints[0].time ** 2
     # A[cc, 11] = 6 * waypoints[0].time
     # A[cc, 12] = 2
-    #cc += 1  # absolute start Phi acceleration
+    #cc += 1  # absolute start Yaw acceleration
     # A[cc, 15] = 2
 
     #cc += 1 # absolute end X acceleration
@@ -283,7 +283,7 @@ def joint(waypoints):
     # A[cc, numCoefficients - 18 + 10] = 12 * waypoints[-1].time ** 2
     # A[cc, numCoefficients - 18 + 11] = 6 * waypoints[-1].time
     # A[cc, numCoefficients - 18 + 12] = 2
-    #cc += 1  # absolute end Phi acceleration
+    #cc += 1  # absolute end Yaw acceleration
     # A[cc, numCoefficients - 18 + 15] = 2
 
     #cc += 1 # absolute start X jerk
@@ -356,7 +356,7 @@ def joint(waypoints):
 
 
 def separate(waypoints):
-    # every segment has its own polynomial of 4th degree for X,Y and Z and a polynomial of 2nd degree for Phi
+    # every segment has its own polynomial of 4th degree for X,Y and Z and a polynomial of 2nd degree for Yaw
     numCoefficients = 3*5+3
     # total number of segments
     numSegments = len(waypoints) - 1
@@ -365,8 +365,8 @@ def separate(waypoints):
 
 
     for i in range(numSegments):
-        # X,Y,Z,Phi position at start and end: 8
-        # X,Y,Z,Phi velocity at start: 4
+        # X,Y,Z,Yaw position at start and end: 8
+        # X,Y,Z,Yaw velocity at start: 4
         # X,Y,Z acceleration at start: 3
         numConstraints = 15
         # X,Y,Z velocity at absolute end: 3
@@ -381,7 +381,7 @@ def separate(waypoints):
         P[0, 0] = 1  # minimize snap for X
         P[5, 5] = 1  # minimize snap for Y
         P[10, 10] = 1  # minimize snap for Z
-        P[15, 15] = 1  # minimize acceleration for Phi
+        P[15, 15] = 1  # minimize acceleration for Yaw
 
         # =============================
         # Gradient vector (linear terms), we have none
@@ -420,7 +420,7 @@ def separate(waypoints):
         A[2, 12] = waypoints[i].time ** 2
         A[2, 13] = waypoints[i].time
         A[2, 14] = 1
-        # Phi Angle Start
+        # Yaw Angle Start
         A[3, 15] = waypoints[i].time ** 2
         A[3, 16] = waypoints[i].time
         A[3, 17] = 1
@@ -443,7 +443,7 @@ def separate(waypoints):
         A[6, 12] = waypoints[i + 1].time ** 2
         A[6, 13] = waypoints[i + 1].time
         A[6, 14] = 1
-        # Phi Angle End
+        # Yaw Angle End
         A[7, 15] = waypoints[i + 1].time ** 2
         A[7, 16] = waypoints[i + 1].time
         A[7, 17] = 1
@@ -463,7 +463,7 @@ def separate(waypoints):
         A[10, 11] = 3 * waypoints[i].time ** 2
         A[10, 12] = 2 * waypoints[i].time
         A[10, 13] = 1
-        # Phi Velocity Start
+        # Yaw Velocity Start
         A[11, 15] = 2 * waypoints[i].time
         A[11, 16] = 1
 
@@ -479,7 +479,7 @@ def separate(waypoints):
         A[14, 10] = 12 * waypoints[i].time ** 2
         A[14, 11] = 6 * waypoints[i].time
         A[14, 12] = 2
-        # Phi Acceleration Start
+        # Yaw Acceleration Start
         #A[15, 15] = 2
 
         # X Jerk Start
@@ -525,11 +525,11 @@ def separate(waypoints):
         b[0, 0] = waypoints[i].x
         b[1, 0] = waypoints[i].y
         b[2, 0] = waypoints[i].z
-        b[3, 0] = waypoints[i].phi
+        b[3, 0] = waypoints[i].yaw
         b[4, 0] = waypoints[i+1].x
         b[5, 0] = waypoints[i+1].y
         b[6, 0] = waypoints[i+1].z
-        b[7, 0] = waypoints[i+1].phi
+        b[7, 0] = waypoints[i+1].yaw
 
         # Derivatives = 0 for absolute Start, else Rendezvous of Segments
         if i != 0:
@@ -589,7 +589,7 @@ def planner(waypoint_arr, isJoint):
     waypoints = []
 
 
-    # the given "waypoints" are just the x,y,z,phi values -> convert them to actual Waypoints
+    # the given "waypoints" are just the x,y,z,yaw values -> convert them to actual Waypoints
     for i in range(size(waypoint_arr)):
         # calculate time of waypoint
         if i == 0:

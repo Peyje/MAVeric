@@ -55,13 +55,13 @@ def draw_traj(waypoints, trajectory):
         ax.plot(t, z_path)
     ax.set_ylabel('Z')
 
-    # add 2D plot of Phi over time
+    # add 2D plot of Yaw over time
     ax = plot.subplot2grid((23, 31), (19, 7), colspan = 6, rowspan=4)
     for i in range(len(trajectory)):
         t = linspace(waypoints[i].time, waypoints[i+1].time, (waypoints[i+1].time-waypoints[i].time)*20)
-        phi_path = trajectory[i][15] * t ** 2 + trajectory[i][16] * t + trajectory[i][17]
-        ax.plot(t, phi_path)
-    ax.set_ylabel('Phi')
+        yaw_path = trajectory[i][15] * t ** 2 + trajectory[i][16] * t + trajectory[i][17]
+        ax.plot(t, yaw_path)
+    ax.set_ylabel('Yaw')
     ax.set_xlabel('Time')
 
     # =============================
@@ -92,13 +92,13 @@ def draw_traj(waypoints, trajectory):
         ax.plot(t, z_path)
     ax.set_ylabel('Z')
 
-    # add 2D plot of Phi over time
+    # add 2D plot of Yaw over time
     ax = plot.subplot2grid((23, 31), (6, 19), colspan=3, rowspan=4)
     for i in range(len(trajectory)):
         t = linspace(waypoints[i].time, waypoints[i + 1].time, (waypoints[i + 1].time - waypoints[i].time) * 20)
-        phi_path = 2 * trajectory[i][15] * t + trajectory[i][16]
-        ax.plot(t, phi_path)
-    ax.set_ylabel('Phi')
+        yaw_path = 2 * trajectory[i][15] * t + trajectory[i][16]
+        ax.plot(t, yaw_path)
+    ax.set_ylabel('Yaw')
     ax.set_xlabel('Time')
 
     # =============================
@@ -129,14 +129,14 @@ def draw_traj(waypoints, trajectory):
         ax.plot(t, z_path)
     ax.set_ylabel('Z')
 
-    # add 2D plot of Phi over time
+    # add 2D plot of Yaw over time
     ax = plot.subplot2grid((23, 31), (19, 19), colspan=3, rowspan=4)
     for i in range(len(trajectory)):
         t = linspace(waypoints[i].time, waypoints[i + 1].time, (waypoints[i + 1].time - waypoints[i].time) * 20)
         oneVec = linspace(1,1, (waypoints[i + 1].time - waypoints[i].time) * 20)
-        phi_path = 2 * trajectory[i][15] * oneVec
-        ax.plot(t, phi_path)
-    ax.set_ylabel('Phi')
+        yaw_path = 2 * trajectory[i][15] * oneVec
+        ax.plot(t, yaw_path)
+    ax.set_ylabel('Yaw')
     ax.set_xlabel('Time')
 
     # =============================
@@ -229,13 +229,13 @@ def draw_traj(waypoints, trajectory):
     ax.text(-0.1,0.7,"Snap", fontweight='bold')
 
     #plot.figtext(0, 0, 'Planned Trajectory:\n '
-    #                   '(X,Y,Z,Phi,X_dot,Y_dot,Z_dot)\n '
+    #                   '(X,Y,Z,Yaw,X_dot,Y_dot,Z_dot)\n '
     #                   'Start: (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f,%0.2f, %0.2f)\n '
     #                   'End: (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f) \n'
     #                   'Time for segment: %0.2f'
-    #             % (waypoint0.x, waypoint0.y, waypoint0.z, waypoint0.phi, waypoint0.x_dot, waypoint0.y_dot,
+    #             % (waypoint0.x, waypoint0.y, waypoint0.z, waypoint0.yaw, waypoint0.x_dot, waypoint0.y_dot,
     #                waypoint0.z_dot,
-    #                waypoint1.x, waypoint1.y, waypoint1.z, waypoint1.phi, waypoint1.x_dot, waypoint1.y_dot,
+    #                waypoint1.x, waypoint1.y, waypoint1.z, waypoint1.yaw, waypoint1.x_dot, waypoint1.y_dot,
     #                waypoint1.z_dot,
     #                waypoint1.time - waypoint0.time))
 
