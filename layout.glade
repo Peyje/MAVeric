@@ -489,7 +489,7 @@
                           <object class="GtkEntry" id="goto_x">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="placeholder_text" translatable="yes">0.00 in Metern</property>
+                            <property name="placeholder_text" translatable="yes">0.00 in metres</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -500,7 +500,7 @@
                           <object class="GtkEntry" id="goto_y">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="placeholder_text" translatable="yes">0.00 in Metern</property>
+                            <property name="placeholder_text" translatable="yes">0.00 in metres</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -511,7 +511,7 @@
                           <object class="GtkEntry" id="goto_z">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="placeholder_text" translatable="yes">0.00 in Metern</property>
+                            <property name="placeholder_text" translatable="yes">0.00 in metres</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -550,7 +550,7 @@
                           <object class="GtkEntry" id="goto_yaw">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="placeholder_text" translatable="yes">0.00 in Radian</property>
+                            <property name="placeholder_text" translatable="yes">0.00 in radian</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -613,7 +613,7 @@
               <object class="GtkLabel" id="goto_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">GoTo (internal PD)</property>
+                <property name="label" translatable="yes">GoTo</property>
                 <property name="justify">center</property>
                 <attributes>
                   <attribute name="size" value="20000"/>
@@ -636,6 +636,7 @@
               <object class="GtkGrid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="halign">center</property>
                 <child>
                   <object class="GtkAlignment">
                     <property name="visible">True</property>
@@ -678,7 +679,7 @@
                           <object class="GtkEntry" id="traj_to_x">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="placeholder_text" translatable="yes">0.00 in Metern</property>
+                            <property name="placeholder_text" translatable="yes">0.00 in metres</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -689,7 +690,7 @@
                           <object class="GtkEntry" id="traj_to_y">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="placeholder_text" translatable="yes">0.00 in Metern</property>
+                            <property name="placeholder_text" translatable="yes">0.00 in metres</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -700,7 +701,7 @@
                           <object class="GtkEntry" id="traj_to_z">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="placeholder_text" translatable="yes">0.00 in Metern</property>
+                            <property name="placeholder_text" translatable="yes">0.00 in metres</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -711,7 +712,7 @@
                           <object class="GtkEntry" id="traj_to_yaw">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="placeholder_text" translatable="yes">0.00 in Radian</property>
+                            <property name="placeholder_text" translatable="yes">0.00 in radian</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -912,70 +913,6 @@
                   <object class="GtkButtonBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="halign">center</property>
-                    <property name="layout_style">start</property>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_PD">
-                        <property name="label" translatable="yes">PD Control</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="onRadioPD" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_ML">
-                        <property name="label" translatable="yes">Not yet usable</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="opacity">0.20000000000000001</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radio_PD</property>
-                        <signal name="toggled" handler="onRadioMatlab" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_ME">
-                        <property name="label" translatable="yes">Not yet usable</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="opacity">0.20000000000000001</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radio_PD</property>
-                        <signal name="toggled" handler="onRadioMellinger" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButtonBox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="layout_style">center</property>
                     <child>
                       <object class="GtkRadioButton" id="radio_joint">
@@ -1015,6 +952,9 @@
                     <property name="left_attach">0</property>
                     <property name="top_attach">3</property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
             </child>

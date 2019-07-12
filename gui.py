@@ -8,11 +8,6 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GLib
 
-# variables for radio switch of controllers
-radioPD = True
-radioSimple = False
-radioErrorCorrection = False
-
 # variable for radio switch of trajectory
 radioJoint = True
 
@@ -167,35 +162,10 @@ class Trajectory:
 			button_go_traj.set_sensitive(False)
 			return False
 
-		# take controller that was chosen in GUI
-		if radioPD:
-			# ======================= PD ==============================
-			point = self.control.nextUpPD(self.i)
-			command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (point[0], point[1], point[2], point[3])
-			comm.write(bytes(command_string, 'utf8'))
-			# =================== end of PD ===========================
-
-		elif radioSimple:
-			print("Not implemented yet, sorry")
-			# ==================== Matlab =============================
-			# calculate next speeds
-			# speeds = self.control.nextUpEasy(self.i, current_state, self.waypoint1)
-
-			# comm them
-			# command_string = 'id1 mav.dyn_callable setspeed [%s, %s, %s, %s] \n' % (speeds[0], speeds[1], speeds[2], speeds[3])
-			# comm.write(bytes(command_string, 'utf8'))
-			# ================= end of Matlab =========================
-
-		elif radioErrorCorrection:
-			print("Not implemented yet, sorry")
-			# =================== Mellinger ===========================
-			# calculate next speeds
-			#speeds = self.control.nextUp(self.i, current_state)
-
-			# comm them
-			#command_string = 'id1 mav.dyn_callable setspeed [%s, %s, %s, %s] \n' % (speeds[0], speeds[1], speeds[2], speeds[3])
-			#comm.write(bytes(command_string, 'utf8'))
-			# ================ end of Mellinger =======================
+		# controller
+		point = self.control.nextUpPD(self.i)
+		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (point[0], point[1], point[2], point[3])
+		comm.write(bytes(command_string, 'utf8'))
 
 		self.i = self.i + 1
 		return GLib.SOURCE_CONTINUE
@@ -268,21 +238,6 @@ class Handler:
 	def onSwitchActivate(self, button, state):
 		command_string = 'id1 mav.waypoint_actuator switch_hold \n'
 		comm.write(bytes(command_string, 'utf8'))
-
-	# check which controller is supposed to be used
-	def onRadioPD(self, button):
-		global radioPD
-		radioPD = not radioPD
-
-	# check which controller is supposed to be used
-	def onRadioMatlab(self, button):
-		global radioSimple
-		radioSimple = not radioSimple
-
-	# check which controller is supposed to be used
-	def onRadioMellinger(self, button):
-		global radioErrorCorrection
-		radioErrorCorrection = not radioErrorCorrection
 
 	# check if trajectory should be calculated jointly or separate
 	def onRadioJoint(self, button):
