@@ -14,7 +14,7 @@ and
 ![Example Picture 2](exampleVisual.png)
 
 ## Work in Progress!
-This currently still is a work in progress! Please take a look at the issue page to see what likely will be implemented in the next few days to weeks.
+This still is a work in progress! Please take a look at the issue page and feel free to ask questions.
 
 ## Installation
 **This installation is written for Ubuntu 18.04, but it should work on other versions or even OSs without much hassle.**
