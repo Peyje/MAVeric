@@ -5,6 +5,11 @@ import matplotlib.pyplot as plot
 
 
 def draw_traj(waypoints, trajectory):
+    """
+    Visualize the trajectories in every dimension by using matplotlib.
+
+    The code is quite repetitive and might be optimized, but it works...
+    """
     mpl.rcParams['legend.fontsize'] = 10
 
     # =============================
@@ -238,7 +243,6 @@ def draw_traj(waypoints, trajectory):
     #                waypoint1.x, waypoint1.y, waypoint1.z, waypoint1.yaw, waypoint1.x_dot, waypoint1.y_dot,
     #                waypoint1.z_dot,
     #                waypoint1.time - waypoint0.time))
-
 
     # print to screen
     plot.show()

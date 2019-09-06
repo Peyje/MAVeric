@@ -1,9 +1,13 @@
-
 from numpy import *
 
 
-# a control object saves the trajectory to follow and calculates the next step of corresponding rotor speeds
 class Control:
+    """
+    Saves the actual trajectory and not just the calculated polynomial coefficients.
+
+    Attributes:
+        all paths: path in corresponding dimension
+    """
     def __init__(self, waypoints, trajectory):
         self.x_path = []
         self.y_path = []
@@ -17,6 +21,8 @@ class Control:
             self.z_path = hstack((self.z_path, trajectory[i][10] * t ** 4 + trajectory[i][11] * t ** 3 + trajectory[i][12] * t ** 2 + trajectory[i][13] * t + trajectory[i][14]))
             self.yaw_path = hstack((self.yaw_path, trajectory[i][15] * t ** 2 + trajectory[i][16] * t + trajectory[i][17]))
 
-    # just send the next position to go to
     def nextUpPD(self, step):
+        """
+        Retrieve the next position to go to.
+        """
         return self.x_path[step], self.y_path[step], self.z_path[step], self.yaw_path[step]

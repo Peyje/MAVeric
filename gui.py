@@ -12,8 +12,17 @@ from gi.repository import GLib
 # variable for radio switch of trajectory
 radioJoint = True
 
-# class to save current state of MAV into
+
 class State:
+	"""
+	Save the current state of the MAV into this class.
+
+	Attributes:
+		x,y,z: position in world frame
+		phi, theta, psi: Euler angles
+		x_dot, y_dot, z_dot: accelerations in world frame
+		p, q, r: angular accelerations in body frame
+	"""
 	def __init__(self):
 		self.x = 0.0
 		self.y = 0.0
@@ -29,8 +38,13 @@ class State:
 		self.r = 0.0
 
 
-# this class retrieves and stores the current state of MAV
 class Bridge:
+	"""
+	Retrieve state of the MAV from Morse, store those and send new values to the GUI.
+
+	Attributes:
+		all labels: GUI labels that show the values for the current state
+	"""
 	def __init__(self):
 		# retrieve labels for state
 		self.state_x_label = builder.get_object("state_x")
@@ -50,8 +64,10 @@ class Bridge:
 		GLib.timeout_add(50, self.updateState)
 		self.updateState()
 
-	# update state values from telnet connection
 	def updateState(self):
+		"""
+		Update state values from telnet connection and set them in the GUI.
+		"""
 		# ask for current pose data
 		comm.write(b'id1 mav.pose_sensor get_local_data \n')
 		# update x value
@@ -91,9 +107,9 @@ class Bridge:
 		current_state.phi = float(read)
 		self.state_phi_label.set_text("%0.2f" % current_state.phi)
 
-		#ask for current velocity data
+		# ask for current velocity data
 		comm.write(b'id1 mav.velocity_sensor get_local_data \n')
-		#update p value
+		# update p value
 		comm.read_until(b'"angular_velocity": [')
 		read = comm.read_until(b',')
 		read = read[:-1]
@@ -135,6 +151,13 @@ class Bridge:
 
 # this class saves the current trajectory and invokes the following of said trajectory
 class Trajectory:
+	"""
+	Save a calculated trajectory and invoke the tracking of said trajectory.
+
+	Attributes:
+		waypoints: waypoints with which the trajectory was calculated
+		trajectory: the calculated polynomial of the planner
+	"""
 	def __init__(self, planner_out):
 		# extract data from planner output
 		self.waypoints = planner_out[0]
@@ -149,18 +172,24 @@ class Trajectory:
 		# set up control object
 		self.control = control.Control(self.waypoints, self.trajectory)
 
-	# start following trajectory
 	def start(self):
-		GLib.timeout_add(50, self.updateSpeeds)
-		self.updateSpeeds()
+		"""
+		Start the tracking of the trajectory by invoking updateDest() every 50ms.
+		"""
+		# deactivate Go button
+		button_go_traj = builder.get_object("traj_go_button")
+		button_go_traj.set_sensitive(False)
+
+		GLib.timeout_add(50, self.updateDest)
+		self.updateDest()
 
 	# calculate and set speed for rotors
-	def updateSpeeds(self):
+	def updateDest(self):
+		"""
+		Calculate the next minor waypoint for the controller and send it via telnet.
+		"""
 		# if end is reached stop calling
 		if self.i == self.numSteps:
-			# deactivate Go button
-			button_go_traj = builder.get_object("traj_go_button")
-			button_go_traj.set_sensitive(False)
 			return False
 
 		# controller
@@ -172,8 +201,19 @@ class Trajectory:
 		return GLib.SOURCE_CONTINUE
 
 
-# handler class for GUI
 class Handler:
+	"""
+	Handles all input into the GUI, such as button presses.
+
+	All on[..] functions are invoked by the GUI itself.
+
+	Attributes:
+		all entries: GUI fields where values can be put in
+		button_go_traj: button to start trajectory tracking
+		button_hold: button to tell controller to hold last position
+		hold: controller should initially hold the position
+		trajectory: object to store a calculated trajectory by the planner
+	"""
 	def __init__(self):
 		# get GUI objects for GoTo
 		self.goto_x_entry = builder.get_object("goto_x")
@@ -196,8 +236,10 @@ class Handler:
 
 		self.trajectory = None  # no trajectory calculated at first
 
-	# if PD Go button is pressed, get values and fly there
 	def onGoToButtonPress(self, button):
+		"""
+		Tell controller to fly to a certain waypoint if button is pressed.
+		"""
 		goto_x = self.goto_x_entry.get_text()
 		goto_y = self.goto_y_entry.get_text()
 		goto_z = self.goto_z_entry.get_text()
@@ -205,8 +247,10 @@ class Handler:
 		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_yaw)
 		comm.write(bytes(command_string, 'utf8'))
 
-	# if Add button is pressed, get values and add waypoint to list
 	def onAddButtonPress(self, button):
+		"""
+		Retrieve waypoint and add to list if button is pressed.
+		"""
 		wp_x = float(self.traj_to_x_entry.get_text())
 		wp_y = float(self.traj_to_y_entry.get_text())
 		wp_z = float(self.traj_to_z_entry.get_text())
@@ -221,8 +265,10 @@ class Handler:
 		self.traj_to_z_entry.set_text('')
 		self.traj_to_yaw_entry.set_text('')
 
-	# if Calculate button is pressed, calculate and create a trajectory object
 	def onTrajCalcButtonPress(self, button):
+		"""
+		Calculate a trajectory, display and store it if button is pressed.
+		"""
 		# calculate trajectory and save as new Trajectory object
 		self.trajectory = Trajectory(trajectory_planner.planner(waypoints_gui, radioJoint))
 		# show generated trajectory in new window
@@ -230,20 +276,26 @@ class Handler:
 		# enable go button
 		self.button_go_traj.set_sensitive(True)
 
-	# if Go button of Trajectory is pressed, start flying and reset list of waypoints
 	def onTrajGoButtonPress(self, button):
+		"""
+		Start tracking of the trajectory and reset list of waypoints.
+		"""
 		self.trajectory.start()
 		# reset waypoints_gui
 		waypoints_gui.clear()
 		waypoints_gui.append([0, 0, 0, 2, 0])
 
-	# switch decides if PD should try to hold position or not
 	def onSwitchActivate(self, button, state):
+		"""
+		Store if PD should hold position or not, depending on the switch state.
+		"""
 		command_string = 'id1 mav.waypoint_actuator switch_hold \n'
 		comm.write(bytes(command_string, 'utf8'))
 
-	# check if trajectory should be calculated jointly or separate
 	def onRadioJoint(self, button):
+		"""
+		Store if trajectory should be calculated jointly or seperately, depending on the radio state.
+		"""
 		global radioJoint
 		radioJoint = not radioJoint
 

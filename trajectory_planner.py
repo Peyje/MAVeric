@@ -1,10 +1,18 @@
 from numpy import *
 from scipy.sparse import csc_matrix
-import draw
 import osqp
 import math
 
+
 class Waypoint:
+    """
+    Store a waypoint.
+
+    Attributes:
+        x,y,z: position in world frame
+        yaw: Euler angle of waypoint
+        time: time at which the waypoint is to be reached
+    """
     def __init__(self, x, y, z, yaw, time):
         self.x = x
         self.y = y
@@ -13,13 +21,19 @@ class Waypoint:
 
         self.time = time
 
-# calculates a fitting time for the trajectory by linking it to the 3d distance
+
 def calc_time(start, end):
+    """
+    Calculate a fitting time for the trajectory between two waypoints.
+    """
     distance3D = sqrt((start[1]-end[1])**2 + (start[2]-end[2])**2 + (start[3]-end[3])**2)
     time = distance3D  # ..where an engineer cries and a programmer sees an easy solution
     return time
 
 def joint(waypoints):
+    """
+    Calculate a trajectory by a joint operation.
+    """
     # total number of segments
     numSegments = len(waypoints) - 1
     # every segment has its own polynomial of 4th degree for X,Y and Z and a polynomial of 2nd degree for Yaw
@@ -356,6 +370,9 @@ def joint(waypoints):
 
 
 def separate(waypoints):
+    """
+    Calculate a trajectory by separate operations.
+    """
     # every segment has its own polynomial of 4th degree for X,Y and Z and a polynomial of 2nd degree for Yaw
     numCoefficients = 3*5+3
     # total number of segments
@@ -575,21 +592,23 @@ def separate(waypoints):
     return trajectory
 
 
-
-
 def planner(waypoint_arr, isJoint=True):
+    """
+    Starting point of any generation.
+
+    Waypoints are given as an array of arrays and transformed into an array of Waypoints.
+    """
     # test waypoints
-    #waypoint_arr = []
-    #waypoint_arr.append([0, 0, 0, 2, 0])
-    #waypoint_arr.append([1, 5, 0, 4, 3])
-    #waypoint_arr.append([2, 5, 5, 3, 1])
-    #waypoint_arr.append([3, 0, 5, 1, 5])
-    #waypoint_arr.append([4, -5, 0, 2, 4])
+    # waypoint_arr = []
+    # waypoint_arr.append([0, 0, 0, 2, 0])
+    # waypoint_arr.append([1, 5, 0, 4, 3])
+    # waypoint_arr.append([2, 5, 5, 3, 1])
+    # waypoint_arr.append([3, 0, 5, 1, 5])
+    # waypoint_arr.append([4, -5, 0, 2, 4])
 
     waypoints = []
 
-
-    # the given "waypoints" are just the x,y,z,yaw values -> convert them to actual Waypoints
+    # the given "waypoints" are just the x,y,z,yaw values -> convert them to actual Waypoint objects
     for i in range(size(waypoint_arr)):
         # calculate time of waypoint
         if i == 0:
@@ -607,4 +626,4 @@ def planner(waypoint_arr, isJoint=True):
         trajectory = separate(waypoints)
 
     # after closing trajectory visualization
-    return waypoints,trajectory
+    return waypoints, trajectory
