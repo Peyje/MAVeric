@@ -577,7 +577,7 @@ def separate(waypoints):
 
 
 
-def planner(waypoint_arr, isJoint):
+def planner(waypoint_arr, isJoint=True):
     # test waypoints
     #waypoint_arr = []
     #waypoint_arr.append([0, 0, 0, 2, 0])
@@ -600,14 +600,11 @@ def planner(waypoint_arr, isJoint):
         waypoint = Waypoint(waypoint_arr[i][1], waypoint_arr[i][2], waypoint_arr[i][3], waypoint_arr[i][4], time)
         waypoints.append(waypoint)
 
-
+    # either calculate jointly or separately
     if isJoint:
         trajectory = joint(waypoints)
     else:
         trajectory = separate(waypoints)
-
-    # show generated trajectory in new window
-    draw.draw_traj(waypoints, trajectory)
 
     # after closing trajectory visualization
     return waypoints,trajectory

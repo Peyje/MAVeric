@@ -2,6 +2,7 @@ import telnetlib
 import gi
 import trajectory_planner
 import control
+import draw
 from numpy import *
 
 gi.require_version('Gtk', '3.0')
@@ -224,6 +225,8 @@ class Handler:
 	def onTrajCalcButtonPress(self, button):
 		# calculate trajectory and save as new Trajectory object
 		self.trajectory = Trajectory(trajectory_planner.planner(waypoints_gui, radioJoint))
+		# show generated trajectory in new window
+		draw.draw_traj(self.trajectory.waypoints, self.trajectory.trajectory)
 		# enable go button
 		self.button_go_traj.set_sensitive(True)
 
