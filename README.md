@@ -9,12 +9,16 @@ and
 
 [2] D. Mellinger and V. Kumar, "**Minimum snap trajectory generation and control for quadrotors,**" 2011 IEEE International Conference on Robotics and Automation, Shanghai, 2011, pp. 2520-2525.
 
+## CLI
+A CLI version of MAVeric is provided as well. Usage is explained by running
+```
+python maveric.py --help
+```
+and an example input file is given.
+
 ## Examplary Overview
 ![Example Picture 1](example.jpg)
 ![Example Picture 2](exampleVisual.png)
-
-## Work in Progress!
-This still is a work in progress! Please take a look at the issue page and feel free to ask questions.
 
 ## Installation
 **This installation is written for Ubuntu 18.04, but it should work on other versions or even OSs without much hassle.**
