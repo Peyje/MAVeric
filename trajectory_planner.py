@@ -609,7 +609,7 @@ def planner(waypoint_arr, isJoint=True):
     waypoints = []
 
     # the given "waypoints" are just the x,y,z,yaw values -> convert them to actual Waypoint objects
-    for i in range(size(waypoint_arr)):
+    for i in range(len(waypoint_arr)):
         # calculate time of waypoint
         if i == 0:
             time = 0
