@@ -23,6 +23,7 @@ class State:
 		x_dot, y_dot, z_dot: accelerations in world frame
 		p, q, r: angular accelerations in body frame
 	"""
+
 	def __init__(self):
 		self.x = 0.0
 		self.y = 0.0
@@ -45,6 +46,7 @@ class Bridge:
 	Attributes:
 		all labels: GUI labels that show the values for the current state
 	"""
+
 	def __init__(self):
 		# retrieve labels for state
 		self.state_x_label = builder.get_object("state_x")
@@ -144,7 +146,7 @@ class Bridge:
 		self.state_z_dot_label.set_text("%0.2f" % current_state.z_dot)
 
 		# update first waypoint for trajectory in GUI
-		waypoints_gui[0] = [0, current_state.x, current_state.y, current_state.z, current_state.psi]
+		waypoints_gui[0] = [current_state.x, current_state.y, current_state.z, current_state.psi]
 
 		return GLib.SOURCE_CONTINUE
 
@@ -158,6 +160,7 @@ class Trajectory:
 		waypoints: waypoints with which the trajectory was calculated
 		trajectory: the calculated polynomial of the planner
 	"""
+
 	def __init__(self, planner_out):
 		# extract data from planner output
 		self.waypoints = planner_out[0]
@@ -188,13 +191,15 @@ class Trajectory:
 		"""
 		Calculate the next minor waypoint for the controller and send it via telnet.
 		"""
+
 		# if end is reached stop calling
 		if self.i == self.numSteps:
 			return False
 
 		# controller
 		point = self.control.nextUpPD(self.i)
-		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (point[0], point[1], point[2], point[3])
+		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (
+			point[0], point[1], point[2], point[3])
 		comm.write(bytes(command_string, 'utf8'))
 
 		self.i = self.i + 1
@@ -214,6 +219,7 @@ class Handler:
 		hold: controller should initially hold the position
 		trajectory: object to store a calculated trajectory by the planner
 	"""
+
 	def __init__(self):
 		# get GUI objects for GoTo
 		self.goto_x_entry = builder.get_object("goto_x")
@@ -244,7 +250,8 @@ class Handler:
 		goto_y = self.goto_y_entry.get_text()
 		goto_z = self.goto_z_entry.get_text()
 		goto_yaw = self.goto_yaw_entry.get_text()
-		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (goto_x, goto_y, goto_z, goto_yaw)
+		command_string = 'id1 mav.waypoint_actuator setdest [%s, %s, %s, %s, 0.2] \n' % (
+			goto_x, goto_y, goto_z, goto_yaw)
 		comm.write(bytes(command_string, 'utf8'))
 
 	def onAddButtonPress(self, button):
@@ -257,7 +264,7 @@ class Handler:
 		wp_yaw = float(self.traj_to_yaw_entry.get_text())
 
 		# add waypoint to list
-		waypoints_gui.append([size(waypoints_gui), wp_x, wp_y, wp_z, wp_yaw])
+		waypoints_gui.append([wp_x, wp_y, wp_z, wp_yaw])
 
 		# reset entry fields
 		self.traj_to_x_entry.set_text('')
@@ -283,7 +290,7 @@ class Handler:
 		self.trajectory.start()
 		# reset waypoints_gui
 		waypoints_gui.clear()
-		waypoints_gui.append([0, 0, 0, 2, 0])
+		waypoints_gui.append([0, 0, 2, 0])
 
 	def onSwitchActivate(self, button, state):
 		"""
@@ -317,7 +324,7 @@ if __name__ == "__main__":
 
 	# get object that shows current waypoints set for trajectory
 	waypoints_gui = builder.get_object('waypoint_store')
-	waypoints_gui.append([0,0,0,2,0])
+	waypoints_gui.append([0, 0, 2, 0])
 
 	# create state object
 	current_state = State()
@@ -327,4 +334,4 @@ if __name__ == "__main__":
 
 	# run GUI
 	Gtk.main()
-	# everything beyond this line will only be run after exiting!
+# everything beyond this line will only be run after exiting!

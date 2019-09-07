@@ -26,7 +26,7 @@ def calc_time(start, end):
     """
     Calculate a fitting time for the trajectory between two waypoints.
     """
-    distance3D = sqrt((start[1]-end[1])**2 + (start[2]-end[2])**2 + (start[3]-end[3])**2)
+    distance3D = sqrt((start[0]-end[0])**2 + (start[1]-end[1])**2 + (start[2]-end[2])**2)
     time = distance3D  # ..where an engineer cries and a programmer sees an easy solution
     return time
 
@@ -616,7 +616,7 @@ def planner(waypoint_arr, isJoint=True):
         else:
             time += calc_time(waypoint_arr[i-1], waypoint_arr[i])
         # create and append waypoint
-        waypoint = Waypoint(waypoint_arr[i][1], waypoint_arr[i][2], waypoint_arr[i][3], waypoint_arr[i][4], time)
+        waypoint = Waypoint(waypoint_arr[i][0], waypoint_arr[i][1], waypoint_arr[i][2], waypoint_arr[i][3], time)
         waypoints.append(waypoint)
 
     # either calculate jointly or separately

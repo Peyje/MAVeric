@@ -4,8 +4,6 @@
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkListStore" id="waypoint_store">
     <columns>
-      <!-- column-name Waypoint -->
-      <column type="gint"/>
       <!-- column-name X -->
       <column type="gfloat"/>
       <!-- column-name Y -->
@@ -838,7 +836,7 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn">
-                                <property name="title" translatable="yes">Waypoint</property>
+                                <property name="title" translatable="yes">X</property>
                                 <child>
                                   <object class="GtkCellRendererText"/>
                                   <attributes>
@@ -849,7 +847,7 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn">
-                                <property name="title" translatable="yes">X</property>
+                                <property name="title" translatable="yes">Y</property>
                                 <child>
                                   <object class="GtkCellRendererText"/>
                                   <attributes>
@@ -860,7 +858,7 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn">
-                                <property name="title" translatable="yes">Y</property>
+                                <property name="title" translatable="yes">Z</property>
                                 <child>
                                   <object class="GtkCellRendererText"/>
                                   <attributes>
@@ -871,22 +869,11 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn">
-                                <property name="title" translatable="yes">Z</property>
-                                <child>
-                                  <object class="GtkCellRendererText"/>
-                                  <attributes>
-                                    <attribute name="text">3</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn">
                                 <property name="title" translatable="yes">Yaw</property>
                                 <child>
                                   <object class="GtkCellRendererText"/>
                                   <attributes>
-                                    <attribute name="text">4</attribute>
+                                    <attribute name="text">3</attribute>
                                   </attributes>
                                 </child>
                               </object>
